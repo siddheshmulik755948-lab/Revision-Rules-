@@ -821,3 +821,384 @@ setInterval(() => {
   renderCountdown();
 
 }, 60000);
+
+/* ================================
+   SMART REVISION SYSTEM
+   Revision Rules: 1, 3, 7, 14, 30
+================================ */
+
+const REVISION_KEY = "revisionRulesData";
+
+function getRevisionData() {
+  return JSON.parse(localStorage.getItem(REVISION_KEY) || "{}");
+}
+
+function saveRevisionData(data) {
+  localStorage.setItem(REVISION_KEY, JSON.stringify(data));
+}
+
+function dateOnly(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function addDays(date, days) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return dateOnly(d);
+}
+
+function formatDate(date) {
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  });
+}
+
+const revisionDays = [1, 3, 7, 14, 30];
+
+function startRevision(subjectName, chapterName) {
+  const data = getRevisionData();
+  const id = subjectName + "||" + chapterName;
+
+  if (!data[id]) {
+    const today = dateOnly(new Date());
+
+    data[id] = {
+      subject: subjectName,
+      chapter: chapterName,
+      started: today.toISOString(),
+      revision: 0,
+      completed: false,
+      dates: revisionDays.map(day =>
+        addDays(today, day).toISOString()
+      )
+    };
+
+    saveRevisionData(data);
+    alert(
+      "✅ Revision Started!\n\n" +
+      chapterName +
+      "\n\nFirst revision: " +
+      formatDate(new Date(data[id].dates[0]))
+    );
+  } else {
+    alert("This chapter is already in your Revision System.");
+  }
+
+  renderRevisionSystem();
+}
+
+function completeRevision(id) {
+  const data = getRevisionData();
+  const item = data[id];
+
+  if (!item) return;
+
+  item.revision++;
+
+  if (item.revision >= revisionDays.length) {
+    item.completed = true;
+  }
+
+  saveRevisionData(data);
+
+  alert(
+    "🎉 Revision Completed!\n\n" +
+    item.chapter +
+    "\nRevision " +
+    item.revision +
+    " completed."
+  );
+
+  renderRevisionSystem();
+}
+
+function isDue(item) {
+  if (!item || item.completed) return false;
+
+  const today = dateOnly(new Date());
+
+  const nextDate = new Date(
+    item.dates[Math.min(item.revision, item.dates.length - 1)]
+  );
+
+  return today >= dateOnly(nextDate);
+}
+
+function renderRevisionSystem() {
+
+  let box = document.getElementById("smartRevisionSystem");
+
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "smartRevisionSystem";
+
+    box.style.cssText = `
+      margin:20px 15px;
+      padding:20px;
+      background:white;
+      border-radius:20px;
+      box-shadow:0 8px 25px rgba(0,0,0,.08);
+      font-family:inherit;
+    `;
+
+    document.body.appendChild(box);
+  }
+
+  const data = getRevisionData();
+  const items = Object.values(data);
+
+  let due = items.filter(isDue);
+  let active = items.filter(x => !x.completed);
+
+  let html = `
+    <h2 style="margin-top:0;">📚 Smart Revision</h2>
+
+    <div style="
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-bottom:18px;
+    ">
+
+      <div style="
+        padding:15px;
+        background:#f3f0ff;
+        border-radius:15px;
+        text-align:center;
+      ">
+        <b style="font-size:24px;">${due.length}</b>
+        <br>
+        <small>Due Today</small>
+      </div>
+
+      <div style="
+        padding:15px;
+        background:#f0f8ff;
+        border-radius:15px;
+        text-align:center;
+      ">
+        <b style="font-size:24px;">${active.length}</b>
+        <br>
+        <small>Active Chapters</small>
+      </div>
+
+    </div>
+  `;
+
+  if (due.length === 0) {
+    html += `
+      <div style="
+        padding:15px;
+        background:#f6fff7;
+        border-radius:15px;
+        margin-bottom:15px;
+      ">
+        ✅ आज कोणतीही revision due नाही.
+      </div>
+    `;
+  }
+
+  due.forEach(item => {
+
+    const id =
+      item.subject + "||" + item.chapter;
+
+    html += `
+      <div style="
+        padding:15px;
+        margin:10px 0;
+        border-radius:15px;
+        background:#fff7f0;
+        border:1px solid #eee;
+      ">
+
+        <b>📖 ${item.chapter}</b>
+
+        <div style="
+          font-size:13px;
+          margin:6px 0;
+          opacity:.7;
+        ">
+          ${item.subject}
+        </div>
+
+        <div style="margin:8px 0;">
+          Revision ${item.revision + 1} / ${revisionDays.length}
+        </div>
+
+        <button
+          onclick="completeRevision('${id.replace(/'/g, "\\'")}')"
+          style="
+            width:100%;
+            padding:12px;
+            border:0;
+            border-radius:12px;
+            background:#5b67e8;
+            color:white;
+            font-size:15px;
+            font-weight:bold;
+          "
+        >
+          ✅ Complete Revision
+        </button>
+
+      </div>
+    `;
+  });
+
+  if (items.length > 0) {
+
+    html += `
+      <h3>📋 My Revision Chapters</h3>
+    `;
+
+    items.forEach(item => {
+
+      html += `
+        <div style="
+          padding:12px;
+          border-bottom:1px solid #eee;
+        ">
+
+          <b>${item.chapter}</b>
+
+          <div style="font-size:12px;opacity:.7;">
+            ${item.subject}
+          </div>
+
+          <div style="font-size:13px;margin-top:5px;">
+            ${
+              item.completed
+              ? "🏆 All revisions completed"
+              : "🔄 Revision " +
+                item.revision +
+                " / " +
+                revisionDays.length
+            }
+          </div>
+
+        </div>
+      `;
+    });
+  }
+
+  box.innerHTML = html;
+}
+
+/* ---------- REVISION BUTTON ---------- */
+
+function createRevisionButton() {
+
+  if (document.getElementById("revisionSystemButton")) return;
+
+  const button = document.createElement("button");
+
+  button.id = "revisionSystemButton";
+
+  button.innerHTML = "📚 Revision";
+
+  button.style.cssText = `
+    position:fixed;
+    right:18px;
+    bottom:75px;
+    z-index:9999;
+    border:none;
+    border-radius:30px;
+    padding:14px 20px;
+    background:#5b67e8;
+    color:white;
+    font-size:15px;
+    font-weight:bold;
+    box-shadow:0 6px 20px rgba(0,0,0,.25);
+  `;
+
+  button.onclick = function() {
+
+    const box =
+      document.getElementById("smartRevisionSystem");
+
+    if (box) {
+      box.scrollIntoView({
+        behavior:"smooth"
+      });
+    }
+  };
+
+  document.body.appendChild(button);
+}
+
+/* ---------- CHAPTER START BUTTON ---------- */
+
+function addStartRevisionButtons() {
+
+  const existing =
+    document.querySelectorAll(".revision-start-button");
+
+  if (existing.length > 0) return;
+
+  if (typeof subjects === "undefined") return;
+
+  subjects.forEach(subject => {
+
+    if (!subject.chapters) return;
+
+    subject.chapters.forEach(chapter => {
+
+      const button = document.createElement("button");
+
+      button.className = "revision-start-button";
+
+      button.innerHTML =
+        "▶️ Start " + chapter;
+
+      button.style.cssText = `
+        display:block;
+        width:100%;
+        margin:6px 0;
+        padding:10px;
+        border:none;
+        border-radius:10px;
+        background:#eef0ff;
+        color:#444;
+        font-weight:bold;
+      `;
+
+      button.onclick = function() {
+        startRevision(
+          subject.name,
+          chapter
+        );
+      };
+
+      /*
+        Buttons are placed inside the
+        Smart Revision section.
+      */
+
+      let box =
+        document.getElementById("smartRevisionSystem");
+
+      if (!box) {
+        renderRevisionSystem();
+        box =
+          document.getElementById("smartRevisionSystem");
+      }
+
+      box.appendChild(button);
+
+    });
+
+  });
+
+}
+
+/* ---------- START ---------- */
+
+setTimeout(() => {
+
+  renderRevisionSystem();
+  createRevisionButton();
+
+}, 1000);
