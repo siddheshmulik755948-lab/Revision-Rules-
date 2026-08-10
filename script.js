@@ -1202,4 +1202,3 @@ setTimeout(() => {
   createRevisionButton();
 
 }, 1000);
-alert
