@@ -822,6 +822,7 @@ setInterval(() => {
 
 }, 60000);
 
+alert("Revision System Loaded!");
 /* ================================
    SMART REVISION SYSTEM
    Revision Rules: 1, 3, 7, 14, 30
