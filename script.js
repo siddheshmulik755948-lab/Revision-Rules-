@@ -579,9 +579,9 @@ function renderTodayCount() {
       const r =
         getChapter(subject.name, chapter);
 
-      if (!r.day1 || !r.day3 || !r.day7) {
-        count++;
-      }
+      if (!r.day2 || !r.day4 || !r.day8 || !r.day16 || !r.day32) {
+  count++;
+}
 
     });
 
