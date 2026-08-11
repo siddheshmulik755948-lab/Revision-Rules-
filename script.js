@@ -304,12 +304,12 @@ function renderSubject() {
 
 
     const completed =
-      [r.day1, r.day3, r.day7]
-      .filter(Boolean).length;
+    [r.day2, r.day4, r.day8, r.day16, r.day32]
+    .filter(Boolean).length;
 
 
     const percent =
-      Math.round((completed / 3) * 100);
+      Math.round((completed / 5) * 100);
 
 
     const card =
@@ -520,7 +520,7 @@ function renderToday() {
         getChapter(subject.name, chapter);
 
 
-      if (!r.day1 || !r.day3 || !r.day7) {
+if (!r.day2 || !r.day4 || !r.day8 || !r.day16 || !r.day32) {
 
         found = true;
 
