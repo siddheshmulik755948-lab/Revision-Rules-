@@ -1200,5 +1200,6 @@ setTimeout(() => {
 
   renderRevisionSystem();
   createRevisionButton();
-
+addStartRevisionButtons();
+  
 }, 1000);
