@@ -117,11 +117,13 @@ function getChapter(subject, chapter) {
   if (!data.revisions[key]) {
 
     data.revisions[key] = {
-      day1: false,
-      day3: false,
-      day7: false,
-      dates: {}
-    };
+    day2: false,
+    day4: false,
+    day8: false,
+    day16: false,
+    day32: false,
+    dates: {}
+};
 
   }
 
@@ -133,17 +135,18 @@ function getChapter(subject, chapter) {
 
 function getSubjectProgress(subject) {
 
-  let total = subject.chapters.length * 3;
+  let total = subject.chapters.length * 5;
   let done = 0;
 
   subject.chapters.forEach(chapter => {
 
     const r = getChapter(subject.name, chapter);
 
-    if (r.day1) done++;
-    if (r.day3) done++;
-    if (r.day7) done++;
-
+    if if (r.day2) done++;
+if (r.day4) done++;
+if (r.day8) done++;
+if (r.day16) done++;
+if (r.day32) done++;
   });
 
   return Math.round((done / total) * 100);
@@ -163,11 +166,13 @@ function getOverallProgress() {
 
       const r = getChapter(subject.name, chapter);
 
-      total += 3;
+      total += 5;
 
-      if (r.day1) done++;
-      if (r.day3) done++;
-      if (r.day7) done++;
+      if (r.day2) done++;
+if (r.day4) done++;
+if (r.day8) done++;
+if (r.day16) done++;
+if (r.day32) done++;
 
     });
 
