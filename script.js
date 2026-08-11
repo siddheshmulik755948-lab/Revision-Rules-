@@ -855,7 +855,7 @@ function formatDate(date) {
   });
 }
 
-const revisionDays = [1, 3, 7, 14, 30];
+const revisionDays = [1, 3, 7, 15, 31];
 
 function startRevision(subjectName, chapterName) {
   const data = getRevisionData();
