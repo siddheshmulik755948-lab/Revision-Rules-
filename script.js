@@ -339,36 +339,61 @@ function renderSubject() {
 
 
       <div class="revision-info">
-        Revision: 
-        ${r.day1 ? "✅ Day 1" : "⬜ Day 1"} 
-        •
-        ${r.day3 ? "✅ Day 3" : "⬜ Day 3"} 
-        •
-        ${r.day7 ? "✅ Day 7" : "⬜ Day 7"}
-      </div>
+    Revision:
+    <div>
+        ${r.day2 ? "✅ Day 2" : "⬜ Day 2"}
+    </div>
+    •
+    <div>
+        ${r.day4 ? "✅ Day 4" : "⬜ Day 4"}
+    </div>
+    •
+    <div>
+        ${r.day8 ? "✅ Day 8" : "⬜ Day 8"}
+    </div>
+    •
+    <div>
+        ${r.day16 ? "✅ Day 16" : "⬜ Day 16"}
+    </div>
+    •
+    <div>
+        ${r.day32 ? "✅ Day 32" : "⬜ Day 32"}
+    </div>
+</div>
 
+<div class="revision-buttons">
 
-      <div class="revision-buttons">
+    <button
+        class="${r.day2 ? "done" : ""}"
+        onclick="completeRevision('${subject.name}','${chapter}','day2')">
+        Day 2
+    </button>
 
-        <button
-          class="${r.day1 ? "done" : ""}"
-          onclick="completeRevision('${subject.name}','${chapter}','day1')">
-          Day 1
-        </button>
+    <button
+        class="${r.day4 ? "done" : ""}"
+        onclick="completeRevision('${subject.name}','${chapter}','day4')">
+        Day 4
+    </button>
 
-        <button
-          class="${r.day3 ? "done" : ""}"
-          onclick="completeRevision('${subject.name}','${chapter}','day3')">
-          Day 3
-        </button>
+    <button
+        class="${r.day8 ? "done" : ""}"
+        onclick="completeRevision('${subject.name}','${chapter}','day8')">
+        Day 8
+    </button>
 
-        <button
-          class="${r.day7 ? "done" : ""}"
-          onclick="completeRevision('${subject.name}','${chapter}','day7')">
-          Day 7
-        </button>
+    <button
+        class="${r.day16 ? "done" : ""}"
+        onclick="completeRevision('${subject.name}','${chapter}','day16')">
+        Day 16
+    </button>
 
-      </div>
+    <button
+        class="${r.day32 ? "done" : ""}"
+        onclick="completeRevision('${subject.name}','${chapter}','day32')">
+        Day 32
+    </button>
+
+</div>
     `;
 
 
