@@ -1,545 +1,2202 @@
-{
-box-sizing: border-box;
-}
+/* =========================================================
+   REVISION RULES
+   HSC SMART REVISION TRACKER
+   PREMIUM MOBILE UI
+========================================================= */
 
+
+/* =========================================================
+   ROOT VARIABLES
+========================================================= */
 
 :root {
---bg: #f5f7fb;
---card: rgba(255,255,255,0.88);
---text: #182033;
---muted: #737b8f;
---primary: #5b67e8;
---primary2: #7b61ff;
---border: rgba(30,40,70,0.08);
---shadow: 0 12px 35px rgba(40,50,90,0.10);
+
+  --primary: #5b67e8;
+  --primary-dark: #4651c9;
+  --primary-light: #eef0ff;
+
+  --background: #f5f7fb;
+  --card: #ffffff;
+
+  --text: #171a2b;
+  --text-secondary: #6b7280;
+  --text-light: #9ca3af;
+
+  --border: #e8eaf2;
+
+  --success: #22c55e;
+  --success-light: #eaf9ef;
+
+  --warning: #f59e0b;
+  --warning-light: #fff7e6;
+
+  --danger: #ef4444;
+  --danger-light: #fff0f0;
+
+  --shadow:
+    0 8px 25px rgba(30, 35, 90, 0.08);
+
+  --shadow-small:
+    0 3px 12px rgba(30, 35, 90, 0.07);
+
+  --radius-large: 24px;
+  --radius: 18px;
+  --radius-small: 12px;
+
+  --transition:
+    0.2s ease;
+
 }
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+
+  margin: 0;
+  padding: 0;
+
+  box-sizing: border-box;
+
+}
+
+
+html {
+
+  scroll-behavior: smooth;
+
+}
+
 
 body {
-margin: 0;
-padding: 0;
-font-family: Arial, sans-serif;
-background:
-radial-gradient(circle at top left, #e8ecff 0%, transparent 35%),
-radial-gradient(circle at bottom right, #f0eaff 0%, transparent 35%),
-var(--bg);
-color: var(--text);
-line-height: 1.5;
-padding-bottom: 90px;
+
+  min-height: 100vh;
+
+  background:
+    linear-gradient(
+      180deg,
+      #f8f9ff 0%,
+      #f5f7fb 45%,
+      #f3f5fa 100%
+    );
+
+  color: var(--text);
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  line-height: 1.5;
+
+  padding-bottom: 90px;
+
 }
+
+
+/* =========================================================
+   BUTTON RESET
+========================================================= */
 
 button {
-font-family: inherit;
+
+  font: inherit;
+
+  border: none;
+
+  cursor: pointer;
+
+  -webkit-tap-highlight-color: transparent;
+
 }
+
+
+button:disabled {
+
+  cursor: not-allowed;
+
+}
+
+
+/* =========================================================
+   TOP BAR
+========================================================= */
 
 .topbar {
-position: sticky;
-top: 0;
-z-index: 50;
 
-display: flex;
-align-items: center;
-justify-content: space-between;
+  position: sticky;
 
-padding: 18px 18px;
+  top: 0;
 
-background: rgba(255,255,255,0.86);
-backdrop-filter: blur(18px);
+  z-index: 100;
 
-border-bottom: 1px solid var(--border);
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding:
+    18px
+    18px
+    16px;
+
+  background:
+    rgba(255, 255, 255, 0.92);
+
+  backdrop-filter:
+    blur(18px);
+
+  -webkit-backdrop-filter:
+    blur(18px);
+
+  border-bottom:
+    1px solid
+    rgba(232, 234, 242, 0.8);
+
 }
+
 
 .app-title {
-font-size: 23px;
-font-weight: 800;
-letter-spacing: -0.5px;
+
+  font-size: 22px;
+
+  font-weight: 800;
+
+  letter-spacing: -0.5px;
+
 }
+
 
 .subtitle {
-font-size: 12px;
-color: var(--muted);
-margin-top: 2px;
+
+  margin-top: 2px;
+
+  color: var(--text-secondary);
+
+  font-size: 12px;
+
 }
+
 
 .streak {
-background: #fff4df;
-color: #e98b00;
-padding: 9px 13px;
-border-radius: 20px;
-font-weight: bold;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  padding:
+    8px
+    12px;
+
+  background:
+    #fff4e8;
+
+  color:
+    #e87516;
+
+  border-radius:
+    999px;
+
+  font-weight: 800;
+
+  font-size: 14px;
+
 }
 
+
+/* =========================================================
+   MAIN
+========================================================= */
+
 main {
-width: 100%;
-max-width: 700px;
-margin: auto;
-padding: 18px;
+
+  width: 100%;
+
+  max-width: 760px;
+
+  margin: 0 auto;
+
+  padding:
+    18px
+    16px
+    30px;
+
 }
+
+
+/* =========================================================
+   PAGE
+========================================================= */
 
 .page {
-display: none;
+
+  display: none;
+
+  animation:
+    pageIn
+    0.25s
+    ease;
+
 }
+
 
 .page.active {
-display: block;
+
+  display: block;
+
 }
+
+
+@keyframes pageIn {
+
+  from {
+
+    opacity: 0;
+
+    transform:
+      translateY(8px);
+
+  }
+
+  to {
+
+    opacity: 1;
+
+    transform:
+      translateY(0);
+
+  }
+
+}
+
+
+/* =========================================================
+   WELCOME CARD
+========================================================= */
 
 .welcome-card {
-display: flex;
-justify-content: space-between;
-align-items: center;
 
-padding: 22px;
-margin-bottom: 25px;
+  position: relative;
 
-border-radius: 25px;
+  overflow: hidden;
 
-background:
-linear-gradient(135deg, #6675ee, #8068ed);
+  display: flex;
 
-color: white;
+  align-items: center;
 
-box-shadow: 0 15px 40px rgba(91,103,232,0.28);
+  justify-content: space-between;
+
+  gap: 15px;
+
+  min-height: 175px;
+
+  padding: 24px;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #5b67e8 0%,
+      #707cf1 50%,
+      #8791f7 100%
+    );
+
+  border-radius:
+    var(--radius-large);
+
+  box-shadow:
+    0 14px 35px
+    rgba(91, 103, 232, 0.24);
+
 }
+
+
+.welcome-card::after {
+
+  content: "";
+
+  position: absolute;
+
+  width: 180px;
+
+  height: 180px;
+
+  right: -70px;
+
+  bottom: -80px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255, 255, 255, 0.12);
+
+}
+
 
 .welcome-card h1 {
-margin: 4px 0;
-font-size: 27px;
+
+  margin:
+    5px
+    0
+    6px;
+
+  font-size: 25px;
+
+  line-height: 1.2;
+
 }
 
-.welcome-card p {
-margin: 0;
-opacity: .85;
+
+.welcome-card p:not(.small-text) {
+
+  max-width: 340px;
+
+  color:
+    rgba(255, 255, 255, 0.85);
+
+  font-size: 13px;
+
 }
+
 
 .small-text {
-font-size: 10px !important;
-font-weight: 800;
-letter-spacing: 1.3px;
-opacity: .7;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 1.2px;
+
+  color:
+    rgba(255, 255, 255, 0.72);
+
 }
+
+
+/* =========================================================
+   OVERALL CIRCLE
+========================================================= */
 
 .overall-circle {
-min-width: 82px;
-height: 82px;
 
-border-radius: 50%;
+  position: relative;
 
-display: flex;
-align-items: center;
-justify-content: center;
+  z-index: 2;
 
-background: rgba(255,255,255,.18);
-border: 5px solid rgba(255,255,255,.35);
+  flex-shrink: 0;
 
-font-size: 18px;
-font-weight: bold;
+  width: 92px;
+
+  height: 92px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border:
+    7px solid
+    rgba(255, 255, 255, 0.25);
+
+  border-top-color:
+    white;
+
+  border-radius: 50%;
+
 }
+
+
+.overall-circle span {
+
+  font-size: 20px;
+
+  font-weight: 800;
+
+}
+
+
+/* =========================================================
+   SECTION HEADING
+========================================================= */
 
 .section-heading {
-display: flex;
-align-items: center;
-justify-content: space-between;
 
-margin: 24px 3px 12px;
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin:
+    25px
+    2px
+    14px;
+
 }
+
 
 .section-heading h2 {
-font-size: 18px;
-margin: 0;
+
+  font-size: 18px;
+
+  letter-spacing: -0.2px;
+
 }
 
-.section-heading span {
-font-size: 11px;
-color: var(--muted);
+
+.section-heading > span {
+
+  color: var(--text-secondary);
+
+  font-size: 11px;
+
+  font-weight: 600;
+
 }
+
+
+/* =========================================================
+   SUBJECT GRID
+========================================================= */
 
 .subject-grid {
-display: grid;
-grid-template-columns: repeat(2, 1fr);
-gap: 12px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+
 }
+
+
+/* =========================================================
+   SUBJECT CARD
+========================================================= */
 
 .subject-card {
-background: var(--card);
-border: 1px solid var(--border);
-border-radius: 20px;
 
-padding: 16px;
+  position: relative;
 
-box-shadow: var(--shadow);
+  min-height: 165px;
 
-cursor: pointer;
-transition: .2s;
+  padding: 18px;
+
+  background:
+    rgba(255, 255, 255, 0.96);
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    var(--radius);
+
+  box-shadow:
+    var(--shadow-small);
+
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition),
+    border-color var(--transition);
+
 }
+
+
+.subject-card:hover {
+
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    var(--shadow);
+
+}
+
 
 .subject-card:active {
-transform: scale(.97);
+
+  transform:
+    scale(0.98);
+
 }
+
 
 .subject-icon {
-font-size: 27px;
+
+  width: 46px;
+
+  height: 46px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  margin-bottom: 13px;
+
+  background:
+    var(--primary-light);
+
+  border-radius:
+    14px;
+
+  font-size: 23px;
+
 }
 
-.subject-name {
-font-weight: 800;
-margin-top: 7px;
+
+.subject-info h3 {
+
+  margin-bottom: 2px;
+
+  font-size: 15px;
+
 }
 
-.subject-percent-small {
-color: var(--muted);
-font-size: 12px;
-margin-top: 3px;
+
+.subject-info p {
+
+  margin-bottom: 10px;
+
+  color:
+    var(--text-secondary);
+
+  font-size: 11px;
+
 }
+
+
+.subject-info > strong {
+
+  display: block;
+
+  margin-top: 7px;
+
+  color:
+    var(--primary);
+
+  font-size: 12px;
+
+}
+
+
+/* =========================================================
+   MINI PROGRESS
+========================================================= */
 
 .mini-progress {
-height: 6px;
-background: #e9ebf3;
-border-radius: 20px;
-overflow: hidden;
-margin-top: 11px;
+
+  width: 100%;
+
+  height: 6px;
+
+  overflow: hidden;
+
+  background:
+    #eceef6;
+
+  border-radius:
+    999px;
+
 }
 
-.mini-progress div {
-height: 100%;
-background: linear-gradient(90deg, var(--primary), var(--primary2));
-border-radius: 20px;
+
+.mini-progress > div {
+
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--primary),
+      #8490fa
+    );
+
+  border-radius:
+    inherit;
+
+  transition:
+    width 0.3s ease;
+
 }
+
+
+/* =========================================================
+   DASHBOARD CARD
+========================================================= */
 
 .dashboard-card {
-background: var(--card);
-border: 1px solid var(--border);
-border-radius: 22px;
 
-padding: 20px;
-margin-top: 16px;
+  margin-top: 16px;
 
-box-shadow: var(--shadow);
+  padding: 20px;
+
+  background:
+    var(--card);
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    var(--radius);
+
+  box-shadow:
+    var(--shadow-small);
+
 }
+
 
 .card-title {
-display: flex;
-justify-content: space-between;
-font-weight: 800;
-margin-bottom: 16px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 16px;
+
+  font-weight: 750;
+
+  font-size: 14px;
+
 }
+
+
+#xpText {
+
+  color:
+    var(--primary);
+
+  font-size: 13px;
+
+}
+
+
+/* =========================================================
+   COUNTDOWN
+========================================================= */
 
 .countdown {
-display: grid;
-grid-template-columns: repeat(3,1fr);
-gap: 10px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 10px;
+
 }
 
-.countdown div {
-text-align: center;
-background: #f4f5fb;
-border-radius: 15px;
-padding: 12px 5px;
+
+.countdown > div {
+
+  padding:
+    13px
+    8px;
+
+  text-align: center;
+
+  background:
+    #f7f8fd;
+
+  border-radius:
+    14px;
+
 }
+
 
 .countdown strong {
-display: block;
-font-size: 22px;
+
+  display: block;
+
+  color:
+    var(--primary);
+
+  font-size: 22px;
+
+  line-height: 1.2;
+
 }
+
 
 .countdown span {
-color: var(--muted);
-font-size: 10px;
+
+  color:
+    var(--text-secondary);
+
+  font-size: 10px;
+
+  font-weight: 600;
+
 }
+
+
+/* =========================================================
+   XP BAR
+========================================================= */
 
 .xp-bar {
-height: 10px;
-background: #e8eaf3;
-border-radius: 20px;
-overflow: hidden;
+
+  width: 100%;
+
+  height: 9px;
+
+  overflow: hidden;
+
+  margin-bottom: 15px;
+
+  background:
+    #eceef6;
+
+  border-radius:
+    999px;
+
 }
 
-.xp-bar div {
-height: 100%;
-width: 0%;
-background: linear-gradient(90deg,#7c68ef,#5c72eb);
-transition: .4s;
+
+#xpBar {
+
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      #f5b73b,
+      #f59e0b
+    );
+
+  border-radius:
+    inherit;
+
+  transition:
+    width 0.35s ease;
+
 }
+
+
+/* =========================================================
+   BADGES
+========================================================= */
 
 .badges {
-display: flex;
-gap: 9px;
-margin-top: 15px;
-flex-wrap: wrap;
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 7px;
+
 }
+
 
 .badge {
-background: #f1efff;
-padding: 8px 11px;
-border-radius: 14px;
-font-size: 12px;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  padding:
+    7px
+    10px;
+
+  background:
+    #fff8e8;
+
+  border:
+    1px solid
+    #f7e6b8;
+
+  border-radius:
+    999px;
+
+  color:
+    #8a6517;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
 }
+
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
 
 .back-btn {
-border: none;
-background: white;
-padding: 10px 14px;
-border-radius: 14px;
-box-shadow: var(--shadow);
 
-color: var(--primary);
-font-weight: bold;
+  display: inline-flex;
 
-margin-bottom: 18px;
+  align-items: center;
+
+  gap: 5px;
+
+  margin-bottom: 17px;
+
+  padding:
+    9px
+    13px;
+
+  color:
+    var(--primary);
+
+  background:
+    var(--primary-light);
+
+  border-radius:
+    11px;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
 }
+
+
+.back-btn:active {
+
+  transform:
+    scale(0.97);
+
+}
+
+
+/* =========================================================
+   SUBJECT HEADER
+========================================================= */
 
 .subject-header {
-display: flex;
-justify-content: space-between;
-align-items: center;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-bottom: 18px;
+
 }
+
+
+.subject-header .small-text {
+
+  color:
+    var(--text-light);
+
+}
+
 
 .subject-header h1 {
-margin: 3px 0 0;
-font-size: 29px;
+
+  margin-top: 2px;
+
+  font-size: 26px;
+
+  letter-spacing: -0.5px;
+
 }
+
 
 .subject-percent {
-font-size: 26px;
-font-weight: 800;
-color: var(--primary);
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-width: 65px;
+
+  min-height: 65px;
+
+  padding: 8px;
+
+  color:
+    var(--primary);
+
+  background:
+    var(--primary-light);
+
+  border-radius: 50%;
+
+  font-size: 16px;
+
+  font-weight: 800;
+
 }
+
+
+/* =========================================================
+   PROGRESS CARD
+========================================================= */
 
 .progress-card {
-background: white;
-border-radius: 20px;
-padding: 18px;
-margin: 18px 0;
-box-shadow: var(--shadow);
+
+  padding: 18px;
+
+  background:
+    var(--card);
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    var(--radius);
+
+  box-shadow:
+    var(--shadow-small);
+
 }
+
 
 .progress-info {
-display: flex;
-justify-content: space-between;
-margin-bottom: 10px;
-font-size: 13px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 11px;
+
+  font-size: 13px;
+
 }
+
+
+.progress-info strong {
+
+  color:
+    var(--primary);
+
+}
+
+
+/* =========================================================
+   LARGE PROGRESS
+========================================================= */
 
 .large-progress {
-height: 12px;
-background: #e8eaf2;
-border-radius: 20px;
-overflow: hidden;
+
+  width: 100%;
+
+  height: 9px;
+
+  overflow: hidden;
+
+  background:
+    #eceef6;
+
+  border-radius:
+    999px;
+
 }
 
-.large-progress div {
-height: 100%;
-background: linear-gradient(90deg,var(--primary),var(--primary2));
-transition: .4s;
+
+.large-progress > div {
+
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--primary),
+      #8791f7
+    );
+
+  border-radius:
+    inherit;
+
+  transition:
+    width 0.35s ease;
+
 }
+
+
+/* =========================================================
+   RULE CARD
+========================================================= */
 
 .rule-card {
-display: flex;
-align-items: center;
-gap: 14px;
 
-padding: 17px;
+  display: flex;
 
-background: linear-gradient(135deg,#f0efff,#f8f7ff);
+  align-items: center;
 
-border: 1px solid #e2dfff;
-border-radius: 20px;
+  gap: 14px;
+
+  margin-top: 15px;
+
+  padding: 17px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f0f2ff,
+      #f8f9ff
+    );
+
+  border:
+    1px solid
+    #e2e5ff;
+
+  border-radius:
+    var(--radius);
+
 }
+
 
 .rule-icon {
-font-size: 30px;
+
+  width: 44px;
+
+  height: 44px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background:
+    white;
+
+  border-radius:
+    13px;
+
+  font-size: 21px;
+
+  box-shadow:
+    var(--shadow-small);
+
 }
+
 
 .rule-card h3 {
-margin: 0 0 3px;
+
+  margin-bottom: 2px;
+
+  font-size: 14px;
+
 }
+
 
 .rule-card p {
-margin: 0;
-color: var(--muted);
-font-size: 12px;
+
+  color:
+    var(--text-secondary);
+
+  font-size: 11px;
+
 }
+
+
+/* =========================================================
+   CHAPTER CONTROLS
+========================================================= */
+
+.chapter-controls {
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  margin-bottom: 12px;
+
+}
+
+
+.add-chapter-btn {
+
+  padding:
+    11px
+    15px;
+
+  color:
+    white;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      #737ff2
+    );
+
+  border-radius:
+    12px;
+
+  box-shadow:
+    0 6px 15px
+    rgba(91, 103, 232, 0.2);
+
+  font-size: 12px;
+
+  font-weight: 750;
+
+}
+
+
+.add-chapter-btn:active {
+
+  transform:
+    scale(0.97);
+
+}
+
+
+/* =========================================================
+   EMPTY CHAPTERS
+========================================================= */
+
+.empty-chapters {
+
+  margin-top: 12px;
+
+  padding: 30px 20px;
+
+  text-align: center;
+
+  color:
+    var(--text-secondary);
+
+  background:
+    white;
+
+  border:
+    1px dashed
+    var(--border);
+
+  border-radius:
+    var(--radius);
+
+}
+
+
+.empty-chapters p {
+
+  margin-bottom: 6px;
+
+  font-size: 12px;
+
+}
+
+
+.empty-chapters strong {
+
+  color:
+    var(--primary);
+
+}
+
+
+/* =========================================================
+   CHAPTER CARD
+========================================================= */
 
 .chapter-card {
-background: white;
-border-radius: 20px;
 
-padding: 17px;
-margin-bottom: 12px;
+  margin-top: 12px;
 
-box-shadow: var(--shadow);
-border: 1px solid var(--border);
+  padding: 17px;
+
+  background:
+    white;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    var(--radius);
+
+  box-shadow:
+    var(--shadow-small);
+
+  transition:
+    transform var(--transition);
+
 }
+
+
+.chapter-card:active {
+
+  transform:
+    scale(0.995);
+
+}
+
+
+/* =========================================================
+   CHAPTER TOP
+========================================================= */
 
 .chapter-top {
-display: flex;
-justify-content: space-between;
-gap: 10px;
+
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 11px;
+
 }
+
 
 .chapter-name {
-font-weight: 800;
+
+  min-width: 0;
+
+  font-size: 14px;
+
+  font-weight: 750;
+
+  word-break: break-word;
+
 }
+
+
+.chapter-number {
+
+  color:
+    var(--primary);
+
+}
+
 
 .chapter-percent {
-color: var(--primary);
-font-weight: bold;
+
+  flex-shrink: 0;
+
+  color:
+    var(--primary);
+
+  font-size: 12px;
+
+  font-weight: 800;
+
 }
+
+
+/* =========================================================
+   CHAPTER PROGRESS
+========================================================= */
 
 .chapter-progress {
-height: 7px;
-background: #e8eaf2;
-border-radius: 20px;
-margin: 12px 0;
-overflow: hidden;
+
+  width: 100%;
+
+  height: 6px;
+
+  overflow: hidden;
+
+  margin-bottom: 13px;
+
+  background:
+    #eceef6;
+
+  border-radius:
+    999px;
+
 }
 
-.chapter-progress div {
-height: 100%;
-background: linear-gradient(90deg,var(--primary),var(--primary2));
+
+.chapter-progress > div {
+
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--primary),
+      #8791f7
+    );
+
+  border-radius:
+    inherit;
+
 }
+
+
+/* =========================================================
+   REVISION INFO
+========================================================= */
 
 .revision-info {
-font-size: 11px;
-color: var(--muted);
-margin-bottom: 12px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+
+  padding-top: 2px;
+
 }
+
+
+.revision-info > div:first-child {
+
+  color:
+    var(--text-secondary);
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.6px;
+
+}
+
+
+.revision-status {
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+}
+
+
+.revision-status span {
+
+  padding:
+    5px
+    8px;
+
+  color:
+    var(--text-secondary);
+
+  background:
+    #f6f7fb;
+
+  border-radius:
+    8px;
+
+  font-size: 10px;
+
+  font-weight: 650;
+
+}
+
+
+.revision-status span.completed {
+
+  color:
+    #15803d;
+
+  background:
+    var(--success-light);
+
+}
+
+
+/* =========================================================
+   REVISION BUTTONS
+========================================================= */
 
 .revision-buttons {
-display: grid;
-grid-template-columns: repeat(3,1fr);
-gap: 7px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 7px;
+
+  margin-top: 14px;
+
 }
 
-.revision-buttons button {
-border: none;
-border-radius: 12px;
-padding: 9px 3px;
 
-background: #f0f1f7;
-color: #555d73;
+.revision-btn {
 
-font-size: 11px;
-font-weight: bold;
+  min-height: 38px;
+
+  padding:
+    7px
+    5px;
+
+  color:
+    var(--primary);
+
+  background:
+    var(--primary-light);
+
+  border:
+    1px solid
+    #dfe3ff;
+
+  border-radius:
+    10px;
+
+  font-size: 10px;
+
+  font-weight: 750;
+
 }
 
-.revision-buttons button.done {
-background: #e9e7ff;
-color: var(--primary);
+
+.revision-btn:not(:disabled):active {
+
+  transform:
+    scale(0.96);
+
 }
+
+
+.revision-btn.done {
+
+  color:
+    #15803d;
+
+  background:
+    var(--success-light);
+
+  border-color:
+    #ccefd7;
+
+}
+
+
+.revision-btn:disabled:not(.done) {
+
+  color:
+    #9ca3af;
+
+  background:
+    #f5f6f9;
+
+  border-color:
+    #ebedf2;
+
+}
+
+
+/* =========================================================
+   CHAPTER MANAGEMENT
+========================================================= */
+
+.chapter-management {
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  margin-top: 13px;
+
+  padding-top: 12px;
+
+  border-top:
+    1px solid
+    #f0f1f5;
+
+}
+
+
+.small-action {
+
+  min-height: 32px;
+
+  padding:
+    6px
+    9px;
+
+  color:
+    var(--text-secondary);
+
+  background:
+    #f6f7fb;
+
+  border-radius:
+    9px;
+
+  font-size: 9px;
+
+  font-weight: 700;
+
+}
+
+
+.small-action:hover {
+
+  background:
+    #eceef7;
+
+}
+
+
+.small-action.edit {
+
+  color:
+    var(--primary);
+
+  background:
+    var(--primary-light);
+
+}
+
+
+.small-action.delete {
+
+  color:
+    var(--danger);
+
+  background:
+    var(--danger-light);
+
+}
+
+
+/* =========================================================
+   PAGE HEADING
+========================================================= */
 
 .page-heading {
-margin-bottom: 20px;
+
+  margin-bottom: 20px;
+
 }
+
+
+.page-heading .small-text {
+
+  color:
+    var(--text-light);
+
+}
+
 
 .page-heading h1 {
-margin: 3px 0;
+
+  margin-top: 3px;
+
+  font-size: 25px;
+
+  letter-spacing: -0.5px;
+
 }
 
-.today-card,
-.progress-subject-card {
-background: white;
-border-radius: 20px;
-padding: 18px;
-margin-bottom: 12px;
-box-shadow: var(--shadow);
+
+/* =========================================================
+   TODAY CARD
+========================================================= */
+
+.today-card {
+
+  margin-bottom: 12px;
+
+  padding: 18px;
+
+  background:
+    white;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    var(--radius);
+
+  box-shadow:
+    var(--shadow-small);
+
 }
 
-.today-card h3,
-.progress-subject-card h3 {
-margin: 0;
+
+.today-card h3 {
+
+  margin-bottom: 5px;
+
+  font-size: 15px;
+
 }
 
-.today-card p,
-.progress-subject-card p {
-color: var(--muted);
-font-size: 12px;
+
+.today-card > p {
+
+  color:
+    var(--text-secondary);
+
+  font-size: 12px;
+
 }
+
+
+.today-revision-label {
+
+  display: inline-flex;
+
+  margin-top: 11px;
+
+  padding:
+    6px
+    9px;
+
+  color:
+    var(--primary);
+
+  background:
+    var(--primary-light);
+
+  border-radius:
+    8px;
+
+  font-size: 10px;
+
+  font-weight: 750;
+
+}
+
 
 .today-btn {
-width: 100%;
-border: none;
-border-radius: 13px;
-padding: 12px;
 
-background: var(--primary);
-color: white;
+  width: 100%;
 
-font-weight: bold;
+  margin-top: 13px;
+
+  min-height: 40px;
+
+  color:
+    white;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      #737ff2
+    );
+
+  border-radius:
+    11px;
+
+  font-size: 11px;
+
+  font-weight: 750;
+
+  box-shadow:
+    0 5px 13px
+    rgba(91, 103, 232, 0.18);
+
 }
+
+
+.today-btn:active {
+
+  transform:
+    scale(0.98);
+
+}
+
+
+/* =========================================================
+   EMPTY TODAY
+========================================================= */
+
+.empty-today {
+
+  padding: 40px 20px;
+
+  text-align: center;
+
+  background:
+    white;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    var(--radius);
+
+  box-shadow:
+    var(--shadow-small);
+
+}
+
+
+.empty-today h2 {
+
+  margin-bottom: 7px;
+
+  font-size: 20px;
+
+}
+
+
+.empty-today p {
+
+  color:
+    var(--text-secondary);
+
+  font-size: 12px;
+
+}
+
+
+/* =========================================================
+   PROGRESS PAGE CARDS
+========================================================= */
+
+#progressList .progress-card {
+
+  margin-bottom: 12px;
+
+}
+
+
+#progressList .progress-card p {
+
+  margin-top: 8px;
+
+  color:
+    var(--text-secondary);
+
+  font-size: 10px;
+
+}
+
+
+/* =========================================================
+   BOTTOM NAVIGATION
+========================================================= */
 
 .bottom-nav {
-position: fixed;
-bottom: 0;
-left: 50%;
-transform: translateX(-50%);
 
-width: 100%;
-max-width: 700px;
+  position: fixed;
 
-height: 72px;
+  left: 50%;
 
-display: grid;
-grid-template-columns: repeat(3,1fr);
+  bottom: 12px;
 
-background: rgba(255,255,255,.92);
-backdrop-filter: blur(18px);
+  z-index: 200;
 
-border-top: 1px solid var(--border);
+  width:
+    calc(100% - 24px);
 
-z-index: 100;
+  max-width: 520px;
+
+  transform:
+    translateX(-50%);
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 4px;
+
+  padding: 7px;
+
+  background:
+    rgba(255, 255, 255, 0.94);
+
+  backdrop-filter:
+    blur(18px);
+
+  -webkit-backdrop-filter:
+    blur(18px);
+
+  border:
+    1px solid
+    rgba(225, 228, 238, 0.9);
+
+  border-radius:
+    20px;
+
+  box-shadow:
+    0 10px 35px
+    rgba(30, 35, 90, 0.14);
+
 }
+
 
 .nav-btn {
-border: none;
-background: transparent;
 
-color: #858b9d;
+  min-height: 55px;
 
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
+  display: flex;
 
-gap: 3px;
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 3px;
+
+  color:
+    var(--text-secondary);
+
+  background:
+    transparent;
+
+  border-radius:
+    14px;
+
+  transition:
+    background var(--transition),
+    color var(--transition),
+    transform var(--transition);
+
 }
+
 
 .nav-btn span {
-font-size: 21px;
+
+  font-size: 18px;
+
+  line-height: 1;
+
 }
+
 
 .nav-btn small {
-font-size: 10px;
+
+  font-size: 9px;
+
+  font-weight: 700;
+
 }
+
 
 .nav-btn.active {
-color: var(--primary);
-font-weight: bold;
+
+  color:
+    var(--primary);
+
+  background:
+    var(--primary-light);
+
 }
 
-.empty {
-background: white;
-padding: 25px;
-text-align: center;
-border-radius: 20px;
-color: var(--muted);
+
+.nav-btn:active {
+
+  transform:
+    scale(0.94);
+
 }
 
-@media(max-width:390px) {
 
-main {
-padding: 14px;
+/* =========================================================
+   INPUT / PROMPT COMPATIBILITY
+========================================================= */
+
+input,
+textarea,
+select {
+
+  font: inherit;
+
 }
 
-.subject-grid {
-gap: 9px;
+
+/* =========================================================
+   SELECTION
+========================================================= */
+
+::selection {
+
+  color:
+    white;
+
+  background:
+    var(--primary);
+
 }
 
-.welcome-card {
-padding: 18px;
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+::-webkit-scrollbar {
+
+  width: 5px;
+
 }
 
-.overall-circle {
-min-width: 70px;
-height: 70px;
+
+::-webkit-scrollbar-track {
+
+  background:
+    transparent;
+
 }
+
+
+::-webkit-scrollbar-thumb {
+
+  background:
+    #cfd3e5;
+
+  border-radius:
+    999px;
+
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (min-width: 600px) {
+
+  main {
+
+    padding:
+      25px
+      22px
+      40px;
+
+  }
+
+
+  .topbar {
+
+    padding-left: 25px;
+
+    padding-right: 25px;
+
+  }
+
+
+  .subject-grid {
+
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+
+  }
+
+
+  .welcome-card {
+
+    min-height: 190px;
+
+    padding: 30px;
+
+  }
+
+
+  .welcome-card h1 {
+
+    font-size: 29px;
+
+  }
+
+
+  .chapter-card {
+
+    padding: 20px;
+
+  }
+
+}
+
+
+/* =========================================================
+   LARGE SCREEN
+========================================================= */
+
+@media (min-width: 900px) {
+
+  body {
+
+    padding-bottom: 30px;
+
+  }
+
+
+  .bottom-nav {
+
+    bottom: 20px;
+
+  }
+
+
+  main {
+
+    max-width: 850px;
+
+  }
+
+
+  .subject-grid {
+
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr));
+
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 360px) {
+
+  main {
+
+    padding-left: 12px;
+
+    padding-right: 12px;
+
+  }
+
+
+  .welcome-card {
+
+    padding: 18px;
+
+  }
+
+
+  .welcome-card h1 {
+
+    font-size: 21px;
+
+  }
+
+
+  .overall-circle {
+
+    width: 78px;
+
+    height: 78px;
+
+  }
+
+
+  .overall-circle span {
+
+    font-size: 17px;
+
+  }
+
+
+  .subject-grid {
+
+    gap: 9px;
+
+  }
+
+
+  .subject-card {
+
+    padding: 14px;
+
+  }
+
+
+  .subject-icon {
+
+    width: 40px;
+
+    height: 40px;
+
+    font-size: 20px;
+
+  }
+
+
+  .subject-info h3 {
+
+    font-size: 13px;
+
+  }
+
+
+  .revision-buttons {
+
+    gap: 5px;
+
+  }
+
+
+  .revision-btn {
+
+    font-size: 9px;
+
+  }
+
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+========================================================= */
+
+button:focus-visible {
+
+  outline:
+    3px solid
+    rgba(91, 103, 232, 0.3);
+
+  outline-offset:
+    2px;
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  * {
+
+    scroll-behavior: auto !important;
+
+    animation-duration:
+      0.01ms !important;
+
+    animation-iteration-count:
+      1 !important;
+
+    transition-duration:
+      0.01ms !important;
+
+  }
+
 }
