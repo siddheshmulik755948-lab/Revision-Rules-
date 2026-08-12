@@ -1,200 +1,610 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Revision Rules </title> 
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#5b67e8">
 
-  <link rel="stylesheet" href="style.css">
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="theme-color"
+    content="#5b67e8"
+  >
+
+  <meta
+    name="description"
+    content="Revision Rules - HSC Smart Revision Tracker"
+  >
+
+  <title>Revision Rules</title>
+
+  <!-- PWA -->
+  <link
+    rel="manifest"
+    href="./manifest.json"
+  >
+
+  <!-- App Icon -->
+  <link
+    rel="icon"
+    href="./icon-192.png"
+    type="image/png"
+  >
+
+  <!-- Main CSS -->
+  <link
+    rel="stylesheet"
+    href="./style.css"
+  >
+
 </head>
+
 
 <body>
 
+
+  <!-- =====================================================
+       TOP HEADER
+  ====================================================== -->
+
   <header class="topbar">
+
     <div>
-      <div class="app-title">Revision Rules</div>
-      <div class="subtitle">HSC Smart Revision Tracker</div>
+
+      <div class="app-title">
+        Revision Rules
+      </div>
+
+      <div class="subtitle">
+        HSC Smart Revision Tracker
+      </div>
+
     </div>
 
-    <div class="streak">
-      🔥 <span id="streakCount">0</span>
+
+    <div
+      class="streak"
+      title="Current Streak"
+    >
+
+      🔥
+
+      <span id="streakCount">
+        0
+      </span>
+
     </div>
+
   </header>
 
 
+
+  <!-- =====================================================
+       MAIN CONTENT
+  ====================================================== -->
+
   <main>
 
-    <!-- HOME -->
-    <section id="homePage" class="page active">
+
+    <!-- ===================================================
+         HOME PAGE
+    ==================================================== -->
+
+    <section
+      id="homePage"
+      class="page active"
+    >
+
+
+      <!-- Welcome -->
 
       <div class="welcome-card">
+
         <div>
-          <p class="small-text">YOUR STUDY PROGRESS</p>
-          <h1>Keep going! 🚀</h1>
-          <p>Small revisions every day create strong memory.</p>
+
+          <p class="small-text">
+            YOUR STUDY PROGRESS
+          </p>
+
+          <h1>
+            Keep going! 🚀
+          </h1>
+
+          <p>
+            Small revisions every day create strong memory.
+          </p>
+
         </div>
+
 
         <div class="overall-circle">
-          <span id="overallProgress">0%</span>
+
+          <span id="overallProgress">
+            0%
+          </span>
+
         </div>
+
       </div>
 
+
+
+      <!-- Subjects Heading -->
 
       <div class="section-heading">
-        <h2>📚 Subjects</h2>
-        <span id="todayCount">0 revisions today</span>
+
+        <h2>
+          📚 Subjects
+        </h2>
+
+        <span id="todayCount">
+          0 revisions today
+        </span>
+
       </div>
 
-      <div id="subjectGrid" class="subject-grid"></div>
 
+
+      <!-- Subjects are created by script.js -->
+
+      <div
+        id="subjectGrid"
+        class="subject-grid"
+      ></div>
+
+
+
+      <!-- HSC Countdown -->
 
       <div class="dashboard-card">
+
         <div class="card-title">
-          <span>🎯 HSC Exam Countdown</span>
+
+          <span>
+            🎯 HSC Exam Countdown
+          </span>
+
         </div>
+
 
         <div class="countdown">
-          <div>
-            <strong id="daysLeft">--</strong>
-            <span>Days</span>
-          </div>
+
 
           <div>
-            <strong id="hoursLeft">--</strong>
-            <span>Hours</span>
+
+            <strong id="daysLeft">
+              --
+            </strong>
+
+            <span>
+              Days
+            </span>
+
           </div>
 
+
           <div>
-            <strong id="minutesLeft">--</strong>
-            <span>Minutes</span>
+
+            <strong id="hoursLeft">
+              --
+            </strong>
+
+            <span>
+              Hours
+            </span>
+
           </div>
+
+
+          <div>
+
+            <strong id="minutesLeft">
+              --
+            </strong>
+
+            <span>
+              Minutes
+            </span>
+
+          </div>
+
+
         </div>
+
       </div>
 
+
+
+      <!-- XP & Badges -->
 
       <div class="dashboard-card">
+
+
         <div class="card-title">
-          <span>⭐ XP & Badges</span>
-          <span id="xpText">0 XP</span>
+
+          <span>
+            ⭐ XP & Badges
+          </span>
+
+          <span id="xpText">
+            0 XP
+          </span>
+
         </div>
+
 
         <div class="xp-bar">
-          <div id="xpBar"></div>
+
+          <div
+            id="xpBar"
+            style="width:0%"
+          ></div>
+
         </div>
 
-        <div id="badges" class="badges"></div>
+
+        <div
+          id="badges"
+          class="badges"
+        ></div>
+
+
       </div>
+
 
     </section>
 
 
-    <!-- SUBJECT -->
-    <section id="subjectPage" class="page">
 
-      <button class="back-btn" onclick="goHome()">← Home</button>
+    <!-- ===================================================
+         SUBJECT PAGE
+    ==================================================== -->
+
+    <section
+      id="subjectPage"
+      class="page"
+    >
+
+
+      <!-- Back -->
+
+      <button
+        type="button"
+        class="back-btn"
+        onclick="goHome()"
+      >
+        ← Home
+      </button>
+
+
+
+      <!-- Subject Header -->
 
       <div class="subject-header">
+
+
         <div>
-          <p class="small-text">SUBJECT</p>
-          <h1 id="subjectTitle">Physics</h1>
+
+          <p class="small-text">
+            SUBJECT
+          </p>
+
+          <h1 id="subjectTitle">
+            Physics
+          </h1>
+
         </div>
 
-        <div class="subject-percent" id="subjectPercent">0%</div>
+
+        <div
+          class="subject-percent"
+          id="subjectPercent"
+        >
+          0%
+        </div>
+
+
       </div>
 
+
+
+      <!-- Subject Progress -->
 
       <div class="progress-card">
+
+
         <div class="progress-info">
-          <span>Overall Progress</span>
-          <strong id="subjectProgressText">0%</strong>
+
+          <span>
+            Overall Progress
+          </span>
+
+          <strong id="subjectProgressText">
+            0%
+          </strong>
+
         </div>
+
 
         <div class="large-progress">
-          <div id="subjectProgressBar"></div>
+
+          <div
+            id="subjectProgressBar"
+            style="width:0%"
+          ></div>
+
         </div>
+
+
       </div>
 
+
+
+      <!-- Revision Rule -->
 
       <div class="rule-card">
-        <div class="rule-icon">🔄</div>
+
+
+        <div class="rule-icon">
+          🔄
+        </div>
+
 
         <div>
-          <h3>Revision Rule</h3>
-          <p>Study → Day 1 → Day 3 → Day 7</p>
+
+          <h3>
+            Revision Rule
+          </h3>
+
+          <p>
+            Day 1 → Day 3 → Day 7
+          </p>
+
         </div>
+
+
       </div>
 
+
+
+      <!-- Chapters -->
 
       <div class="section-heading">
-        <h2>📖 Chapters</h2>
+
+        <h2>
+          📖 Chapters
+        </h2>
+
       </div>
 
-      <div id="chapterList"></div>
+
+      <!--
+        script.js will create:
+        - Add Chapter
+        - Chapter cards
+        - Revision buttons
+        - Edit
+        - Delete
+        - Move Up
+        - Move Down
+      -->
+
+      <div
+        id="chapterList"
+      ></div>
+
 
     </section>
 
 
-    <!-- TODAY -->
-    <section id="todayPage" class="page">
+
+    <!-- ===================================================
+         TODAY'S REVISION PAGE
+    ==================================================== -->
+
+    <section
+      id="todayPage"
+      class="page"
+    >
+
 
       <div class="page-heading">
-        <p class="small-text">YOUR SCHEDULE</p>
-        <h1>🔔 Today's Revision</h1>
+
+        <p class="small-text">
+          YOUR SCHEDULE
+        </p>
+
+        <h1>
+          🔔 Today's Revision
+        </h1>
+
       </div>
 
-      <div id="todayList"></div>
+
+      <!--
+        script.js automatically displays
+        today's due revisions here.
+      -->
+
+      <div
+        id="todayList"
+      ></div>
+
 
     </section>
 
 
-    <!-- PROGRESS -->
-    <section id="progressPage" class="page">
+
+    <!-- ===================================================
+         PROGRESS PAGE
+    ==================================================== -->
+
+    <section
+      id="progressPage"
+      class="page"
+    >
+
 
       <div class="page-heading">
-        <p class="small-text">YOUR PERFORMANCE</p>
-        <h1>📊 Progress</h1>
+
+        <p class="small-text">
+          YOUR PERFORMANCE
+        </p>
+
+        <h1>
+          📊 Progress
+        </h1>
+
       </div>
 
-      <div id="progressList"></div>
+
+      <!--
+        script.js automatically displays
+        every subject's progress here.
+      -->
+
+      <div
+        id="progressList"
+      ></div>
+
 
     </section>
+
 
   </main>
 
 
-  <!-- BOTTOM NAVIGATION -->
-  <nav class="bottom-nav">
 
-    <button class="nav-btn active" onclick="showPage('homePage', this)">
-      <span>🏠</span>
-      <small>Home</small>
+  <!-- =====================================================
+       BOTTOM NAVIGATION
+  ====================================================== -->
+
+  <nav
+    class="bottom-nav"
+    aria-label="Main navigation"
+  >
+
+
+    <!-- HOME -->
+
+    <button
+      type="button"
+      class="nav-btn active"
+      onclick="showPage('homePage', this)"
+    >
+
+      <span>
+        🏠
+      </span>
+
+      <small>
+        Home
+      </small>
+
     </button>
 
-    <button class="nav-btn" onclick="showPage('todayPage', this)">
-  🔄
-  <span>Revision</span>
-</button>
 
-    <button class="nav-btn" onclick="showPage('progressPage', this)">
-      <span>📊</span>
-      <small>Progress</small>
+
+    <!-- REVISION -->
+
+    <button
+      type="button"
+      class="nav-btn"
+      onclick="showPage('todayPage', this)"
+    >
+
+      <span>
+        🔄
+      </span>
+
+      <small>
+        Revision
+      </small>
+
     </button>
+
+
+
+    <!-- PROGRESS -->
+
+    <button
+      type="button"
+      class="nav-btn"
+      onclick="showPage('progressPage', this)"
+    >
+
+      <span>
+        📊
+      </span>
+
+      <small>
+        Progress
+      </small>
+
+    </button>
+
 
   </nav>
 
 
-  <script src="script.js"></script>
+
+  <!-- =====================================================
+       JAVASCRIPT
+  ====================================================== -->
+
+  <script
+    src="./script.js"
+    defer
+  ></script>
+
+
+
+  <!-- =====================================================
+       SERVICE WORKER / PWA
+  ====================================================== -->
+
   <script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js")
-        .then(() => console.log("Revision Rules PWA ready"))
-        .catch(error => console.log("PWA error:", error));
-    });
-  }
-</script>
+
+    if ("serviceWorker" in navigator) {
+
+      window.addEventListener(
+        "load",
+        function () {
+
+          navigator.serviceWorker
+            .register("./service-worker.js")
+            .then(
+              function () {
+
+                console.log(
+                  "Revision Rules PWA ready"
+                );
+
+              }
+            )
+            .catch(
+              function (error) {
+
+                console.log(
+                  "PWA error:",
+                  error
+                );
+
+              }
+            );
+
+        }
+      );
+
+    }
+
+  </script>
+
 
 </body>
+
 </html>
