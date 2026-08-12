@@ -1,883 +1,111 @@
-const subjects = [
+/* =========================================================
+   REVISION RULES
+   HSC SMART REVISION TRACKER
+   Complete script.js
+   ========================================================= */
+
+"use strict";
+
+/* =========================================================
+   SETTINGS
+   ========================================================= */
+
+const APP_VERSION = "3.0";
+
+const REVISION_DAYS = [1, 3, 7];
+
+const STORAGE_KEY = "revision_rules_v3";
+
+const DEFAULT_SUBJECTS = [
   {
+    id: "physics",
     name: "Physics",
     icon: "⚡",
-    chapters: [
-      "Chapter 1",
-      "Chapter 2",
-      "Chapter 3",
-      "Chapter 4",
-      "Chapter 5"
-    ]
+    chapters: []
   },
-
   {
+    id: "chemistry",
     name: "Chemistry",
     icon: "🧪",
-    chapters: [
-      "Chapter 1",
-      "Chapter 2",
-      "Chapter 3",
-      "Chapter 4",
-      "Chapter 5"
-    ]
+    chapters: []
   },
-
   {
+    id: "math1",
     name: "Mathematics Part 1",
-    icon: "➗",
-    chapters: [
-      "Chapter 1",
-      "Chapter 2",
-      "Chapter 3",
-      "Chapter 4",
-      "Chapter 5"
-    ]
-  },
-
-  {
-    name: "Mathematics Part 2",
     icon: "📐",
-    chapters: [
-      "Chapter 1",
-      "Chapter 2",
-      "Chapter 3",
-      "Chapter 4",
-      "Chapter 5"
-    ]
+    chapters: []
   },
-
   {
+    id: "math2",
+    name: "Mathematics Part 2",
+    icon: "📘",
+    chapters: []
+  },
+  {
+    id: "biology",
     name: "Biology",
     icon: "🧬",
-    chapters: [
-      "Chapter 1",
-      "Chapter 2",
-      "Chapter 3",
-      "Chapter 4",
-      "Chapter 5"
-    ]
+    chapters: []
   },
-
   {
+    id: "english",
     name: "English",
-    icon: "📘",
-    chapters: [
-      "Chapter 1",
-      "Chapter 2",
-      "Chapter 3",
-      "Chapter 4",
-      "Chapter 5"
-    ]
+    icon: "📖",
+    chapters: []
   },
-
   {
+    id: "marathi",
     name: "Marathi",
-    icon: "📕",
-    chapters: [
-      "Chapter 1",
-      "Chapter 2",
-      "Chapter 3",
-      "Chapter 4",
-      "Chapter 5"
-    ]
+    icon: "📚",
+    chapters: []
   }
 ];
 
+/* =========================================================
+   GLOBAL STATE
+   ========================================================= */
 
-const STORAGE_KEY = "revisionRulesData";
+let data = loadData();
 
-let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
-  revisions: {},
-  xp: 0,
-  streak: 0,
-  lastRevisionDate: null
-};
+let selectedSubjectId = null;
 
 
-let currentSubject = null;
+/* =========================================================
+   BASIC HELPERS
+   ========================================================= */
+
+function $(id) {
+  return document.getElementById(id);
+}
 
 
-/* SAVE DATA */
-
-function saveData() {
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(data)
+function createId(prefix = "id") {
+  return (
+    prefix +
+    "_" +
+    Date.now().toString(36) +
+    "_" +
+    Math.random().toString(36).substring(2, 8)
   );
 }
 
 
-/* GET CHAPTER DATA */
+function todayString() {
+  return new Date().toISOString().split("T")[0];
+}
 
-function getChapter(subject, chapter) {
 
-  const key = subject + "|" + chapter;
-
-  if (!data.revisions[key]) {
-
-    data.revisions[key] = {
-    day2: false,
-    day4: false,
-    day8: false,
-    day16: false,
-    day32: false,
-    dates: {}
-};
-
+function formatDate(dateString) {
+  if (!dateString) {
+    return "--";
   }
 
-  return data.revisions[key];
-}
+  const date = new Date(dateString + "T00:00:00");
 
-
-/* SUBJECT PROGRESS */
-
-function getSubjectProgress(subject) {
-
-  let total = subject.chapters.length * 5;
-  let done = 0;
-
-  subject.chapters.forEach(chapter => {
-
-    const r = getChapter(subject.name, chapter);
-
-    if if (r.day2) done++;
-if (r.day4) done++;
-if (r.day8) done++;
-if (r.day16) done++;
-if (r.day32) done++;
-  });
-
-  return Math.round((done / total) * 100);
-}
-
-
-/* OVERALL PROGRESS */
-
-function getOverallProgress() {
-
-  let total = 0;
-  let done = 0;
-
-  subjects.forEach(subject => {
-
-    subject.chapters.forEach(chapter => {
-
-      const r = getChapter(subject.name, chapter);
-
-      total += 5;
-
-      if (r.day2) done++;
-if (r.day4) done++;
-if (r.day8) done++;
-if (r.day16) done++;
-if (r.day32) done++;
-
-    });
-
-  });
-
-  if (!total) return 0;
-
-  return Math.round((done / total) * 100);
-}
-
-
-/* HOME */
-
-function renderHome() {
-
-  const grid = document.getElementById("subjectGrid");
-
-  grid.innerHTML = "";
-
-  subjects.forEach(subject => {
-
-    const percent = getSubjectProgress(subject);
-
-    const card = document.createElement("div");
-
-    card.className = "subject-card";
-
-    card.innerHTML = `
-      <div class="subject-icon">${subject.icon}</div>
-
-      <div class="subject-name">
-        ${subject.name}
-      </div>
-
-      <div class="subject-percent-small">
-        ${percent}% completed
-      </div>
-
-      <div class="mini-progress">
-        <div style="width:${percent}%"></div>
-      </div>
-    `;
-
-    card.onclick = () => openSubject(subject);
-
-    grid.appendChild(card);
-
-  });
-
-
-  const overall = getOverallProgress();
-
-  document.getElementById("overallProgress").textContent =
-    overall + "%";
-
-
-  document.getElementById("streakCount").textContent =
-    data.streak;
-
-
-  document.getElementById("xpText").textContent =
-    data.xp + " XP";
-
-
-  const xpPercent =
-    Math.min((data.xp % 100), 100);
-
-  document.getElementById("xpBar").style.width =
-    xpPercent + "%";
-
-
-  renderBadges();
-  renderCountdown();
-  renderTodayCount();
-
-}
-
-
-/* OPEN SUBJECT */
-
-function openSubject(subject) {
-
-  currentSubject = subject;
-
-  document.getElementById("homePage")
-    .classList.remove("active");
-
-  document.getElementById("subjectPage")
-    .classList.add("active");
-
-  document.getElementById("subjectTitle")
-    .textContent = subject.name;
-
-  renderSubject();
-
-}
-
-
-/* SUBJECT PAGE */
-
-function renderSubject() {
-
-  const subject = currentSubject;
-
-  const percent =
-    getSubjectProgress(subject);
-
-
-  document.getElementById("subjectPercent")
-    .textContent = percent + "%";
-
-  document.getElementById("subjectProgressText")
-    .textContent = percent + "%";
-
-  document.getElementById("subjectProgressBar")
-    .style.width = percent + "%";
-
-
-  const list =
-    document.getElementById("chapterList");
-
-  list.innerHTML = "";
-
-
-  subject.chapters.forEach(chapter => {
-
-    const r =
-      getChapter(subject.name, chapter);
-
-
-    const completed =
-    [r.day2, r.day4, r.day8, r.day16, r.day32]
-    .filter(Boolean).length;
-
-
-    const percent =
-      Math.round((completed / 5) * 100);
-
-
-    const card =
-      document.createElement("div");
-
-    card.className = "chapter-card";
-
-
-    card.innerHTML = `
-
-      <div class="chapter-top">
-
-        <div class="chapter-name">
-          ${chapter}
-        </div>
-
-        <div class="chapter-percent">
-          ${percent}%
-        </div>
-
-      </div>
-
-
-      <div class="chapter-progress">
-        <div style="width:${percent}%"></div>
-      </div>
-
-
-      <div class="revision-info">
-    Revision:
-    <div>
-        ${r.day2 ? "✅ Day 2" : "⬜ Day 2"}
-    </div>
-    •
-    <div>
-        ${r.day4 ? "✅ Day 4" : "⬜ Day 4"}
-    </div>
-    •
-    <div>
-        ${r.day8 ? "✅ Day 8" : "⬜ Day 8"}
-    </div>
-    •
-    <div>
-        ${r.day16 ? "✅ Day 16" : "⬜ Day 16"}
-    </div>
-    •
-    <div>
-        ${r.day32 ? "✅ Day 32" : "⬜ Day 32"}
-    </div>
-</div>
-
-<div class="revision-buttons">
-
-    <button
-        class="${r.day2 ? "done" : ""}"
-        onclick="completeRevision('${subject.name}','${chapter}','day2')">
-        Day 2
-    </button>
-
-    <button
-        class="${r.day4 ? "done" : ""}"
-        onclick="completeRevision('${subject.name}','${chapter}','day4')">
-        Day 4
-    </button>
-
-    <button
-        class="${r.day8 ? "done" : ""}"
-        onclick="completeRevision('${subject.name}','${chapter}','day8')">
-        Day 8
-    </button>
-
-    <button
-        class="${r.day16 ? "done" : ""}"
-        onclick="completeRevision('${subject.name}','${chapter}','day16')">
-        Day 16
-    </button>
-
-    <button
-        class="${r.day32 ? "done" : ""}"
-        onclick="completeRevision('${subject.name}','${chapter}','day32')">
-        Day 32
-    </button>
-
-</div>
-    `;
-
-
-    list.appendChild(card);
-
-  });
-
-}
-
-
-/* COMPLETE REVISION */
-
-function completeRevision(
-  subject,
-  chapter,
-  revision
-) {
-
-  const r =
-    getChapter(subject, chapter);
-
-
-  if (r[revision]) return;
-
-
-  r[revision] = true;
-
-
-  const today =
-    new Date().toISOString().split("T")[0];
-
-
-  r.dates[revision] = today;
-
-
-  data.xp += 10;
-
-
-  updateStreak();
-
-
-  saveData();
-
-
-  renderSubject();
-  renderHome();
-  renderToday();
-
-
-  alert("Revision completed! 🎉 +10 XP");
-
-}
-
-
-/* STREAK */
-
-function updateStreak() {
-
-  const today =
-    new Date().toISOString().split("T")[0];
-
-
-  if (data.lastRevisionDate === today) {
-    return;
+  if (Number.isNaN(date.getTime())) {
+    return "--";
   }
 
-
-  if (!data.lastRevisionDate) {
-
-    data.streak = 1;
-
-  } else {
-
-    const last =
-      new Date(data.lastRevisionDate);
-
-    const current =
-      new Date(today);
-
-
-    const difference =
-      Math.floor(
-        (current - last) /
-        (1000 * 60 * 60 * 24)
-      );
-
-
-    if (difference === 1) {
-
-      data.streak++;
-
-    } else {
-
-      data.streak = 1;
-
-    }
-
-  }
-
-
-  data.lastRevisionDate = today;
-
-}
-
-
-/* TODAY REVISION */
-
-function renderToday() {
-
-  const list =
-    document.getElementById("todayList");
-
-  list.innerHTML = "";
-
-
-  let found = false;
-
-
-  subjects.forEach(subject => {
-
-    subject.chapters.forEach(chapter => {
-
-      const r =
-        getChapter(subject.name, chapter);
-
-
-if (!r.day2 || !r.day4 || !r.day8 || !r.day16 || !r.day32) {
-
-        found = true;
-
-
-        const card =
-          document.createElement("div");
-
-        card.className = "today-card";
-
-
-        card.innerHTML = `
-          <h3>${subject.icon} ${subject.name}</h3>
-
-          <p>${chapter}</p>
-
-          <button
-            class="today-btn"
-            onclick="openSubjectByName('${subject.name}')">
-            Open Revision
-          </button>
-        `;
-
-
-        list.appendChild(card);
-
-      }
-
-    });
-
-  });
-
-
-  if (!found) {
-
-    list.innerHTML = `
-      <div class="empty">
-        🎉 All revisions are completed!
-      </div>
-    `;
-
-  }
-
-}
-
-
-/* TODAY COUNT */
-
-function renderTodayCount() {
-
-  let count = 0;
-
-  subjects.forEach(subject => {
-
-    subject.chapters.forEach(chapter => {
-
-      const r =
-        getChapter(subject.name, chapter);
-
-      if (!r.day2 || !r.day4 || !r.day8 || !r.day16 || !r.day32) {
-  count++;
-}
-
-    });
-
-  });
-
-
-  document.getElementById("todayCount")
-    .textContent = count + " revisions remaining";
-
-}
-
-
-/* PROGRESS PAGE */
-
-function renderProgress() {
-
-  const list =
-    document.getElementById("progressList");
-
-  list.innerHTML = "";
-
-
-  subjects.forEach(subject => {
-
-    const percent =
-      getSubjectProgress(subject);
-
-
-    const card =
-      document.createElement("div");
-
-    card.className =
-      "progress-subject-card";
-
-
-    card.innerHTML = `
-
-      <h3>
-        ${subject.icon} ${subject.name}
-      </h3>
-
-      <p>
-        ${percent}% of revision plan completed
-      </p>
-
-      <div class="large-progress">
-        <div style="width:${percent}%"></div>
-      </div>
-
-    `;
-
-
-    list.appendChild(card);
-
-  });
-
-}
-
-
-/* BADGES */
-
-function renderBadges() {
-
-  const box =
-    document.getElementById("badges");
-
-  box.innerHTML = "";
-
-
-  const badges = [];
-
-
-  if (data.xp >= 10)
-    badges.push("🌱 First Revision");
-
-
-  if (data.xp >= 50)
-    badges.push("⭐ 50 XP");
-
-
-  if (data.xp >= 100)
-    badges.push("🏆 100 XP");
-
-
-  if (data.streak >= 3)
-    badges.push("🔥 3 Day Streak");
-
-
-  if (data.streak >= 7)
-    badges.push("👑 7 Day Streak");
-
-
-  if (!badges.length) {
-
-    box.innerHTML =
-      `<span class="badge">🔒 Start revising</span>`;
-
-    return;
-
-  }
-
-
-  badges.forEach(badge => {
-
-    const el =
-      document.createElement("span");
-
-    el.className = "badge";
-
-    el.textContent = badge;
-
-    box.appendChild(el);
-
-  });
-
-}
-
-
-/* COUNTDOWN */
-
-function renderCountdown() {
-
-  /*
-    HSC countdown date can be changed here later.
-    For now this is a placeholder date.
-  */
-
-  const examDate =
-    new Date("2027-02-15T09:00:00");
-
-
-  const now =
-    new Date();
-
-
-  const difference =
-    examDate - now;
-
-
-  if (difference <= 0) {
-
-    document.getElementById("daysLeft")
-      .textContent = "0";
-
-    document.getElementById("hoursLeft")
-      .textContent = "0";
-
-    document.getElementById("minutesLeft")
-      .textContent = "0";
-
-    return;
-
-  }
-
-
-  const days =
-    Math.floor(
-      difference /
-      (1000 * 60 * 60 * 24)
-    );
-
-
-  const hours =
-    Math.floor(
-      (difference /
-      (1000 * 60 * 60)) % 24
-    );
-
-
-  const minutes =
-    Math.floor(
-      (difference /
-      (1000 * 60)) % 60
-    );
-
-
-  document.getElementById("daysLeft")
-    .textContent = days;
-
-  document.getElementById("hoursLeft")
-    .textContent = hours;
-
-  document.getElementById("minutesLeft")
-    .textContent = minutes;
-
-}
-
-
-/* NAVIGATION */
-
-function showPage(pageId, button) {
-
-  document.querySelectorAll(".page")
-    .forEach(page =>
-      page.classList.remove("active")
-    );
-
-
-  document.getElementById(pageId)
-    .classList.add("active");
-
-
-  document.querySelectorAll(".nav-btn")
-    .forEach(btn =>
-      btn.classList.remove("active")
-    );
-
-
-  if (button) {
-    button.classList.add("active");
-  }
-
-
-  if (pageId === "todayPage") {
-    renderToday();
-  }
-
-
-  if (pageId === "progressPage") {
-    renderProgress();
-  }
-
-}
-
-
-/* HOME */
-
-function goHome() {
-
-  document.querySelectorAll(".page")
-    .forEach(page =>
-      page.classList.remove("active")
-    );
-
-
-  document.getElementById("homePage")
-    .classList.add("active");
-
-  currentSubject = null;
-
-  renderHome();
-
-}
-
-
-/* OPEN SUBJECT BY NAME */
-
-function openSubjectByName(name) {
-
-  const subject =
-    subjects.find(s => s.name === name);
-
-  if (subject) {
-    openSubject(subject);
-  }
-
-}
-
-
-/* START APP */
-
-renderHome();
-renderToday();
-
-setInterval(() => {
-
-  renderCountdown();
-
-}, 60000);
-
-/* ================================
-   SMART REVISION SYSTEM
-   Revision Rules: 1, 3, 7, 14, 30
-================================ */
-
-const REVISION_KEY = "revisionRulesData";
-
-function getRevisionData() {
-  return JSON.parse(localStorage.getItem(REVISION_KEY) || "{}");
-}
-
-function saveRevisionData(data) {
-  localStorage.setItem(REVISION_KEY, JSON.stringify(data));
-}
-
-function dateOnly(date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
-function addDays(date, days) {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return dateOnly(d);
-}
-
-function formatDate(date) {
   return date.toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
@@ -885,351 +113,2179 @@ function formatDate(date) {
   });
 }
 
-const revisionDays = [1, 3, 7, 15, 31];
 
-function startRevision(subjectName, chapterName) {
-  const data = getRevisionData();
-  const id = subjectName + "||" + chapterName;
+function addDays(dateString, days) {
+  const date = new Date(dateString + "T00:00:00");
 
-  if (!data[id]) {
-    const today = dateOnly(new Date());
+  date.setDate(date.getDate() + Number(days));
 
-    data[id] = {
-      subject: subjectName,
-      chapter: chapterName,
-      started: today.toISOString(),
-      revision: 0,
-      completed: false,
-      dates: revisionDays.map(day =>
-        addDays(today, day).toISOString()
-      )
-    };
-
-    saveRevisionData(data);
-    alert(
-      "✅ Revision Started!\n\n" +
-      chapterName +
-      "\n\nFirst revision: " +
-      formatDate(new Date(data[id].dates[0]))
-    );
-  } else {
-    alert("This chapter is already in your Revision System.");
-  }
-
-  renderRevisionSystem();
+  return date.toISOString().split("T")[0];
 }
 
-function completeRevision(id) {
-  const data = getRevisionData();
-  const item = data[id];
 
-  if (!item) return;
+function escapeHTML(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
-  item.revision++;
 
-  if (item.revision >= revisionDays.length) {
-    item.completed = true;
+/* =========================================================
+   DEFAULT DATA
+   ========================================================= */
+
+function createDefaultData() {
+  return {
+    version: APP_VERSION,
+
+    subjects: DEFAULT_SUBJECTS.map(subject => ({
+      id: subject.id,
+      name: subject.name,
+      icon: subject.icon,
+      chapters: []
+    })),
+
+    revisions: {},
+
+    xp: 0,
+
+    streak: {
+      current: 0,
+      best: 0,
+      lastDate: null
+    },
+
+    settings: {
+      examDate: ""
+    }
+  };
+}
+
+
+/* =========================================================
+   LOAD DATA
+   ========================================================= */
+
+function loadData() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (!saved) {
+      return createDefaultData();
+    }
+
+    const parsed = JSON.parse(saved);
+
+    if (!parsed || typeof parsed !== "object") {
+      return createDefaultData();
+    }
+
+    if (!Array.isArray(parsed.subjects)) {
+      parsed.subjects = createDefaultData().subjects;
+    }
+
+    if (!parsed.revisions || typeof parsed.revisions !== "object") {
+      parsed.revisions = {};
+    }
+
+    if (typeof parsed.xp !== "number") {
+      parsed.xp = 0;
+    }
+
+    if (!parsed.streak || typeof parsed.streak !== "object") {
+      parsed.streak = {
+        current: 0,
+        best: 0,
+        lastDate: null
+      };
+    }
+
+    if (!parsed.settings || typeof parsed.settings !== "object") {
+      parsed.settings = {
+        examDate: ""
+      };
+    }
+
+    parsed.version = APP_VERSION;
+
+    return parsed;
+
+  } catch (error) {
+
+    console.error("Data loading error:", error);
+
+    return createDefaultData();
+  }
+}
+
+
+/* =========================================================
+   SAVE DATA
+   ========================================================= */
+
+function saveData() {
+  try {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(data)
+    );
+
+    return true;
+
+  } catch (error) {
+
+    console.error("Data saving error:", error);
+
+    alert(
+      "⚠️ Data save होऊ शकला नाही.\n\n" +
+      "Browser storage भरलेले असू शकते."
+    );
+
+    return false;
+  }
+}
+
+
+/* =========================================================
+   SUBJECT HELPERS
+   ========================================================= */
+
+function getSubjectById(subjectId) {
+
+  return data.subjects.find(
+    subject => subject.id === subjectId
+  ) || null;
+}
+
+
+function getSubjectByName(subjectName) {
+
+  return data.subjects.find(
+    subject => subject.name === subjectName
+  ) || null;
+}
+
+
+function getChapter(subjectId, chapterId) {
+
+  const subject = getSubjectById(subjectId);
+
+  if (!subject) {
+    return null;
   }
 
-  saveRevisionData(data);
+  return (
+    subject.chapters.find(
+      chapter => chapter.id === chapterId
+    ) || null
+  );
+}
+
+
+function getRevisionKey(subjectId, chapterId) {
+
+  return subjectId + "__" + chapterId;
+}
+
+
+function getRevision(subjectId, chapterId) {
+
+  const key = getRevisionKey(
+    subjectId,
+    chapterId
+  );
+
+  if (!data.revisions[key]) {
+
+    data.revisions[key] = {
+      day1: false,
+      day3: false,
+      day7: false,
+
+      dates: {
+        day1: null,
+        day3: null,
+        day7: null
+      },
+
+      startedDate: null
+    };
+  }
+
+  return data.revisions[key];
+}
+
+
+/* =========================================================
+   REVISION PROGRESS
+   ========================================================= */
+
+function getChapterCompletedCount(subjectId, chapterId) {
+
+  const revision = getRevision(
+    subjectId,
+    chapterId
+  );
+
+  return [
+    revision.day1,
+    revision.day3,
+    revision.day7
+  ].filter(Boolean).length;
+}
+
+
+function getChapterPercent(subjectId, chapterId) {
+
+  const completed =
+    getChapterCompletedCount(
+      subjectId,
+      chapterId
+    );
+
+  return Math.round(
+    (completed / REVISION_DAYS.length) * 100
+  );
+}
+
+
+function getSubjectProgress(subjectId) {
+
+  const subject = getSubjectById(subjectId);
+
+  if (!subject || subject.chapters.length === 0) {
+    return 0;
+  }
+
+  let total = 0;
+  let completed = 0;
+
+  subject.chapters.forEach(chapter => {
+
+    total += REVISION_DAYS.length;
+
+    completed += getChapterCompletedCount(
+      subjectId,
+      chapter.id
+    );
+  });
+
+  if (total === 0) {
+    return 0;
+  }
+
+  return Math.round(
+    (completed / total) * 100
+  );
+}
+
+
+function getOverallProgress() {
+
+  let total = 0;
+  let completed = 0;
+
+  data.subjects.forEach(subject => {
+
+    subject.chapters.forEach(chapter => {
+
+      total += REVISION_DAYS.length;
+
+      completed += getChapterCompletedCount(
+        subject.id,
+        chapter.id
+      );
+    });
+  });
+
+  if (total === 0) {
+    return 0;
+  }
+
+  return Math.round(
+    (completed / total) * 100
+  );
+}
+
+
+/* =========================================================
+   DUE REVISION
+   ========================================================= */
+
+function isRevisionDue(
+  subjectId,
+  chapterId,
+  revisionDay
+) {
+
+  const revision = getRevision(
+    subjectId,
+    chapterId
+  );
+
+  const dateKey = "day" + revisionDay;
+
+  if (revision[dateKey]) {
+    return false;
+  }
+
+  const date = revision.dates[dateKey];
+
+  if (!date) {
+    return false;
+  }
+
+  return date <= todayString();
+}
+
+
+function getDueRevisions() {
+
+  const due = [];
+
+  data.subjects.forEach(subject => {
+
+    subject.chapters.forEach(chapter => {
+
+      const revision =
+        getRevision(
+          subject.id,
+          chapter.id
+        );
+
+      REVISION_DAYS.forEach(day => {
+
+        const key = "day" + day;
+
+        if (
+          !revision[key] &&
+          revision.dates[key] &&
+          revision.dates[key] <= todayString()
+        ) {
+
+          due.push({
+            subjectId: subject.id,
+            subjectName: subject.name,
+            subjectIcon: subject.icon,
+            chapterId: chapter.id,
+            chapterName: chapter.name,
+            day: day,
+            date: revision.dates[key]
+          });
+        }
+      });
+
+    });
+
+  });
+
+  return due;
+}
+
+
+/* =========================================================
+   START REVISION
+   ========================================================= */
+
+function startRevision(subjectId, chapterId) {
+
+  const subject =
+    getSubjectById(subjectId);
+
+  const chapter =
+    getChapter(
+      subjectId,
+      chapterId
+    );
+
+  if (!subject || !chapter) {
+    return;
+  }
+
+  const revision =
+    getRevision(
+      subjectId,
+      chapterId
+    );
+
+  if (revision.startedDate) {
+
+    alert(
+      "ℹ️ हा chapter आधीच Revision System मध्ये आहे."
+    );
+
+    return;
+  }
+
+  const today = todayString();
+
+  revision.startedDate = today;
+
+  revision.day1 = false;
+  revision.day3 = false;
+  revision.day7 = false;
+
+  revision.dates = {
+    day1: today,
+    day3: addDays(today, 2),
+    day7: addDays(today, 6)
+  };
+
+  saveData();
+
+  alert(
+    "✅ Revision Started!\n\n" +
+    chapter.name +
+    "\n\n" +
+    "Day 1: " +
+    formatDate(revision.dates.day1) +
+    "\n" +
+    "Day 3: " +
+    formatDate(revision.dates.day3) +
+    "\n" +
+    "Day 7: " +
+    formatDate(revision.dates.day7)
+  );
+
+  renderSubject();
+  renderToday();
+  renderHome();
+  renderProgress();
+}
+
+
+/* =========================================================
+   COMPLETE REVISION
+   ========================================================= */
+
+function completeRevision(
+  subjectId,
+  chapterId,
+  revisionDay
+) {
+
+  const revision =
+    getRevision(
+      subjectId,
+      chapterId
+    );
+
+  const key = "day" + revisionDay;
+
+  if (revision[key]) {
+    return;
+  }
+
+  revision[key] = true;
+
+  revision.dates[key] =
+    todayString();
+
+  data.xp += 10;
+
+  updateStreak();
+
+  saveData();
+
+  const chapter =
+    getChapter(
+      subjectId,
+      chapterId
+    );
+
+  const chapterName =
+    chapter ? chapter.name : "Chapter";
 
   alert(
     "🎉 Revision Completed!\n\n" +
-    item.chapter +
-    "\nRevision " +
-    item.revision +
-    " completed."
+    chapterName +
+    "\n" +
+    "Day " +
+    revisionDay +
+    " completed.\n\n" +
+    "+10 XP ⭐"
   );
 
-  renderRevisionSystem();
+  renderSubject();
+  renderToday();
+  renderHome();
+  renderProgress();
 }
 
-function isDue(item) {
-  if (!item || item.completed) return false;
 
-  const today = dateOnly(new Date());
+/* =========================================================
+   STREAK
+   ========================================================= */
 
-  const nextDate = new Date(
-    item.dates[Math.min(item.revision, item.dates.length - 1)]
-  );
+function updateStreak() {
 
-  return today >= dateOnly(nextDate);
-}
+  const today = todayString();
 
-function renderRevisionSystem() {
+  const last =
+    data.streak.lastDate;
 
-  let box = document.getElementById("smartRevisionSystem");
+  if (!last) {
 
-  if (!box) {
-    box = document.createElement("div");
-    box.id = "smartRevisionSystem";
+    data.streak.current = 1;
+    data.streak.best = 1;
+    data.streak.lastDate = today;
 
-    box.style.cssText = `
-      margin:20px 15px;
-      padding:20px;
-      background:white;
-      border-radius:20px;
-      box-shadow:0 8px 25px rgba(0,0,0,.08);
-      font-family:inherit;
-    `;
-
-    document.body.appendChild(box);
+    return;
   }
 
-  const data = getRevisionData();
-  const items = Object.values(data);
+  if (last === today) {
+    return;
+  }
 
-  let due = items.filter(isDue);
-  let active = items.filter(x => !x.completed);
+  const yesterday =
+    addDays(today, -1);
 
-  let html = `
-    <h2 style="margin-top:0;">📚 Smart Revision</h2>
+  if (last === yesterday) {
 
-    <div style="
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-bottom:18px;
-    ">
+    data.streak.current += 1;
 
-      <div style="
-        padding:15px;
-        background:#f3f0ff;
-        border-radius:15px;
-        text-align:center;
-      ">
-        <b style="font-size:24px;">${due.length}</b>
-        <br>
-        <small>Due Today</small>
+  } else {
+
+    data.streak.current = 1;
+  }
+
+  if (
+    data.streak.current >
+    data.streak.best
+  ) {
+
+    data.streak.best =
+      data.streak.current;
+  }
+
+  data.streak.lastDate = today;
+}
+
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+function getBadges() {
+
+  const badges = [];
+
+  if (data.xp >= 10) {
+    badges.push("🌱 First Revision");
+  }
+
+  if (data.xp >= 50) {
+    badges.push("⭐ 50 XP");
+  }
+
+  if (data.xp >= 100) {
+    badges.push("🏆 100 XP");
+  }
+
+  if (data.streak.current >= 3) {
+    badges.push("🔥 3 Day Streak");
+  }
+
+  if (data.streak.current >= 7) {
+    badges.push("🔥 7 Day Streak");
+  }
+
+  if (getOverallProgress() >= 50) {
+    badges.push("📚 Half Way");
+  }
+
+  if (getOverallProgress() === 100) {
+    badges.push("👑 Revision Master");
+  }
+
+  return badges;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+function showPage(pageId, button) {
+
+  const pages =
+    document.querySelectorAll(".page");
+
+  pages.forEach(page => {
+    page.classList.remove("active");
+  });
+
+  const target =
+    document.getElementById(pageId);
+
+  if (target) {
+    target.classList.add("active");
+  }
+
+  const navButtons =
+    document.querySelectorAll(".nav-btn");
+
+  navButtons.forEach(btn => {
+    btn.classList.remove("active");
+  });
+
+  if (button) {
+    button.classList.add("active");
+  }
+
+  if (pageId === "homePage") {
+    renderHome();
+  }
+
+  if (pageId === "subjectPage") {
+    renderSubject();
+  }
+
+  if (pageId === "todayPage") {
+    renderToday();
+  }
+
+  if (pageId === "progressPage") {
+    renderProgress();
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+
+/* =========================================================
+   HOME
+   ========================================================= */
+
+function renderHome() {
+
+  const percent =
+    getOverallProgress();
+
+  const progressElements = [
+    $("overallPercent"),
+    $("homePercent"),
+    $("overallProgressText")
+  ];
+
+  progressElements.forEach(element => {
+
+    if (element) {
+      element.textContent =
+        percent + "%";
+    }
+  });
+
+  const progressBars = [
+    $("overallProgressBar"),
+    $("homeProgressBar")
+  ];
+
+  progressBars.forEach(element => {
+
+    if (element) {
+      element.style.width =
+        percent + "%";
+    }
+  });
+
+  const streakElement =
+    $("streak");
+
+  if (streakElement) {
+
+    streakElement.textContent =
+      data.streak.current;
+  }
+
+  const xpElement =
+    $("xp");
+
+  if (xpElement) {
+
+    xpElement.textContent =
+      data.xp + " XP";
+  }
+
+  const todayCount =
+    getDueRevisions().length;
+
+  const todayElements = [
+    $("todayCount"),
+    $("todayRevisionCount")
+  ];
+
+  todayElements.forEach(element => {
+
+    if (element) {
+
+      element.textContent =
+        todayCount +
+        " revisions today";
+    }
+  });
+
+  renderSubjectCardsHome();
+  renderCountdown();
+  renderBadges();
+}
+
+
+/* =========================================================
+   HOME SUBJECT CARDS
+   ========================================================= */
+
+function renderSubjectCardsHome() {
+
+  const container =
+    $("subjectList");
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = "";
+
+  data.subjects.forEach(subject => {
+
+    const percent =
+      getSubjectProgress(
+        subject.id
+      );
+
+    const card =
+      document.createElement("div");
+
+    card.className =
+      "subject-card";
+
+    card.innerHTML = `
+      <div class="subject-card-top">
+
+        <div>
+          <span class="subject-icon">
+            ${escapeHTML(subject.icon)}
+          </span>
+
+          <strong>
+            ${escapeHTML(subject.name)}
+          </strong>
+        </div>
+
+        <span>
+          ${percent}%
+        </span>
+
       </div>
 
-      <div style="
-        padding:15px;
-        background:#f0f8ff;
-        border-radius:15px;
-        text-align:center;
-      ">
-        <b style="font-size:24px;">${active.length}</b>
-        <br>
-        <small>Active Chapters</small>
+      <div class="progress-bar">
+        <div
+          class="progress-fill"
+          style="width:${percent}%"
+        ></div>
       </div>
+
+      <button
+        class="subject-open-btn"
+        onclick="openSubject('${subject.id}')"
+      >
+        Open Subject
+      </button>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+
+/* =========================================================
+   OPEN SUBJECT
+   ========================================================= */
+
+function openSubject(subjectId) {
+
+  const subject =
+    getSubjectById(subjectId);
+
+  if (!subject) {
+    return;
+  }
+
+  selectedSubjectId =
+    subjectId;
+
+  showPage(
+    "subjectPage",
+    null
+  );
+
+  renderSubject();
+}
+
+
+/* =========================================================
+   SUBJECT PAGE
+   ========================================================= */
+
+function renderSubject() {
+
+  const page =
+    $("subjectPage");
+
+  if (!page) {
+    return;
+  }
+
+  if (!selectedSubjectId) {
+
+    selectedSubjectId =
+      data.subjects.length
+        ? data.subjects[0].id
+        : null;
+  }
+
+  if (!selectedSubjectId) {
+
+    page.innerHTML = `
+      <div class="empty-state">
+        No subjects available.
+      </div>
+    `;
+
+    return;
+  }
+
+  const subject =
+    getSubjectById(
+      selectedSubjectId
+    );
+
+  if (!subject) {
+    return;
+  }
+
+  page.innerHTML = `
+    <div class="subject-header">
+
+      <div>
+        <h2>
+          ${escapeHTML(subject.icon)}
+          ${escapeHTML(subject.name)}
+        </h2>
+
+        <p>
+          ${subject.chapters.length}
+          chapters
+        </p>
+      </div>
+
+      <button
+        class="manage-btn"
+        onclick="manageChapters()"
+      >
+        ⚙️ Manage Chapters
+      </button>
 
     </div>
+
+    <div class="subject-progress-box">
+
+      <div>
+        <strong>Subject Progress</strong>
+      </div>
+
+      <div class="progress-bar">
+        <div
+          class="progress-fill"
+          style="width:${getSubjectProgress(subject.id)}%"
+        ></div>
+      </div>
+
+      <strong>
+        ${getSubjectProgress(subject.id)}%
+      </strong>
+
+    </div>
+
+    <div class="chapter-list" id="chapterList"></div>
   `;
 
-  if (due.length === 0) {
-    html += `
-      <div style="
-        padding:15px;
-        background:#f6fff7;
-        border-radius:15px;
-        margin-bottom:15px;
-      ">
-        ✅ आज कोणतीही revision due नाही.
-      </div>
-    `;
+  const list =
+    $("chapterList");
+
+  if (!list) {
+    return;
   }
 
-  due.forEach(item => {
+  if (subject.chapters.length === 0) {
 
-    const id =
-      item.subject + "||" + item.chapter;
+    list.innerHTML = `
+      <div class="empty-state">
 
-    html += `
-      <div style="
-        padding:15px;
-        margin:10px 0;
-        border-radius:15px;
-        background:#fff7f0;
-        border:1px solid #eee;
-      ">
+        <h3>📚 No Chapters Yet</h3>
 
-        <b>📖 ${item.chapter}</b>
-
-        <div style="
-          font-size:13px;
-          margin:6px 0;
-          opacity:.7;
-        ">
-          ${item.subject}
-        </div>
-
-        <div style="margin:8px 0;">
-          Revision ${item.revision + 1} / ${revisionDays.length}
-        </div>
+        <p>
+          तुझ्या मते chapter add करण्यासाठी
+          खालील button वापर.
+        </p>
 
         <button
-          onclick="completeRevision('${id.replace(/'/g, "\\'")}')"
-          style="
-            width:100%;
-            padding:12px;
-            border:0;
-            border-radius:12px;
-            background:#5b67e8;
-            color:white;
-            font-size:15px;
-            font-weight:bold;
-          "
+          class="add-chapter-btn"
+          onclick="addChapter()"
         >
-          ✅ Complete Revision
+          ➕ Add First Chapter
         </button>
 
       </div>
     `;
-  });
 
-  if (items.length > 0) {
-
-    html += `
-      <h3>📋 My Revision Chapters</h3>
-    `;
-
-    items.forEach(item => {
-
-      html += `
-        <div style="
-          padding:12px;
-          border-bottom:1px solid #eee;
-        ">
-
-          <b>${item.chapter}</b>
-
-          <div style="font-size:12px;opacity:.7;">
-            ${item.subject}
-          </div>
-
-          <div style="font-size:13px;margin-top:5px;">
-            ${
-              item.completed
-              ? "🏆 All revisions completed"
-              : "🔄 Revision " +
-                item.revision +
-                " / " +
-                revisionDays.length
-            }
-          </div>
-
-        </div>
-      `;
-    });
+    return;
   }
 
-  box.innerHTML = html;
-}
+  subject.chapters.forEach(
+    (chapter, index) => {
 
-/* ---------- REVISION BUTTON ---------- */
-
-function createRevisionButton() {
-
-  if (document.getElementById("revisionSystemButton")) return;
-
-  const button = document.createElement("button");
-
-  button.id = "revisionSystemButton";
-
-  button.innerHTML = "📚 Revision";
-
-  button.style.cssText = `
-    position:fixed;
-    right:18px;
-    bottom:75px;
-    z-index:9999;
-    border:none;
-    border-radius:30px;
-    padding:14px 20px;
-    background:#5b67e8;
-    color:white;
-    font-size:15px;
-    font-weight:bold;
-    box-shadow:0 6px 20px rgba(0,0,0,.25);
-  `;
-
-  button.onclick = function() {
-
-    const box =
-      document.getElementById("smartRevisionSystem");
-
-    if (box) {
-      box.scrollIntoView({
-        behavior:"smooth"
-      });
+      list.appendChild(
+        createChapterCard(
+          subject,
+          chapter,
+          index
+        )
+      );
     }
-  };
-
-  document.body.appendChild(button);
+  );
 }
 
-/* ---------- CHAPTER START BUTTON ---------- */
 
-function addStartRevisionButtons() {
+/* =========================================================
+   CHAPTER CARD
+   ========================================================= */
 
-  const existing =
-    document.querySelectorAll(".revision-start-button");
+function createChapterCard(
+  subject,
+  chapter,
+  index
+) {
 
-  if (existing.length > 0) return;
+  const revision =
+    getRevision(
+      subject.id,
+      chapter.id
+    );
 
-  if (typeof subjects === "undefined") return;
+  const percent =
+    getChapterPercent(
+      subject.id,
+      chapter.id
+    );
 
-  subjects.forEach(subject => {
+  const card =
+    document.createElement("div");
 
-    if (!subject.chapters) return;
+  card.className =
+    "chapter-card";
 
-    subject.chapters.forEach(chapter => {
+  const started =
+    Boolean(revision.startedDate);
 
-      const button = document.createElement("button");
+  card.innerHTML = `
 
-      button.className = "revision-start-button";
+    <div class="chapter-top">
 
-      button.innerHTML =
-        "▶️ Start " + chapter;
+      <div class="chapter-name">
+        ${index + 1}.
+        ${escapeHTML(chapter.name)}
+      </div>
 
-      button.style.cssText = `
-        display:block;
-        width:100%;
-        margin:6px 0;
-        padding:10px;
-        border:none;
-        border-radius:10px;
-        background:#eef0ff;
-        color:#444;
-        font-weight:bold;
-      `;
+      <div class="chapter-percent">
+        ${percent}%
+      </div>
 
-      button.onclick = function() {
-        startRevision(
-          subject.name,
-          chapter
-        );
-      };
+    </div>
 
-      /*
-        Buttons are placed inside the
-        Smart Revision section.
-      */
+    <div class="chapter-progress">
 
-      let box =
-        document.getElementById("smartRevisionSystem");
+      <div
+        class="chapter-progress-fill"
+        style="width:${percent}%"
+      ></div>
 
-      if (!box) {
-        renderRevisionSystem();
-        box =
-          document.getElementById("smartRevisionSystem");
+    </div>
+
+    <div class="revision-info">
+
+      <div>
+        Revision:
+      </div>
+
+      <div>
+        ${revision.day1
+          ? "✅ Day 1"
+          : "⬜ Day 1"}
+      </div>
+
+      <div>
+        ${revision.day3
+          ? "✅ Day 3"
+          : "⬜ Day 3"}
+      </div>
+
+      <div>
+        ${revision.day7
+          ? "✅ Day 7"
+          : "⬜ Day 7"}
+      </div>
+
+    </div>
+
+    <div class="revision-buttons">
+
+      ${
+        !started
+        ? `
+          <button
+            onclick="
+              startRevision(
+                '${subject.id}',
+                '${chapter.id}'
+              )
+            "
+          >
+            ▶️ Start Revision
+          </button>
+        `
+        : ""
       }
 
-      box.appendChild(button);
+      ${
+        started
+        ? `
+          <button
+            class="${revision.day1 ? "done" : ""}"
+            ${
+              revision.day1
+                ? "disabled"
+                : `
+                  onclick="
+                    completeRevision(
+                      '${subject.id}',
+                      '${chapter.id}',
+                      1
+                    )
+                  "
+                `
+            }
+          >
+            Day 1
+          </button>
 
-    });
+          <button
+            class="${revision.day3 ? "done" : ""}"
+            ${
+              revision.day3
+                ? "disabled"
+                : `
+                  onclick="
+                    completeRevision(
+                      '${subject.id}',
+                      '${chapter.id}',
+                      3
+                    )
+                  "
+                `
+            }
+          >
+            Day 3
+          </button>
 
-  });
+          <button
+            class="${revision.day7 ? "done" : ""}"
+            ${
+              revision.day7
+                ? "disabled"
+                : `
+                  onclick="
+                    completeRevision(
+                      '${subject.id}',
+                      '${chapter.id}',
+                      7
+                    )
+                  "
+                `
+            }
+          >
+            Day 7
+          </button>
+        `
+        : ""
+      }
 
+    </div>
+
+  `;
+
+  return card;
 }
 
-/* ---------- START ---------- */
 
-setTimeout(() => {
+/* =========================================================
+   CHAPTER MANAGEMENT
+   ========================================================= */
 
-  renderRevisionSystem();
-  createRevisionButton();
-addStartRevisionButtons();
-  
-}, 1000);
+function manageChapters() {
+
+  const subject =
+    getSubjectById(
+      selectedSubjectId
+    );
+
+  if (!subject) {
+    return;
+  }
+
+  const page =
+    $("subjectPage");
+
+  if (!page) {
+    return;
+  }
+
+  page.innerHTML = `
+    <div class="manage-header">
+
+      <button
+        onclick="renderSubject()"
+      >
+        ← Back
+      </button>
+
+      <h2>
+        ⚙️ Manage Chapters
+      </h2>
+
+    </div>
+
+    <div class="manage-info">
+
+      <p>
+        ${escapeHTML(subject.name)}
+      </p>
+
+      <p>
+        Chapter चा क्रम पूर्णपणे तुझ्या हातात आहे.
+      </p>
+
+    </div>
+
+    <button
+      class="add-chapter-btn"
+      onclick="addChapter()"
+    >
+      ➕ Add Chapter
+    </button>
+
+    <div id="manageChapterList"></div>
+  `;
+
+  renderManageChapterList();
+}
+
+
+/* =========================================================
+   MANAGE CHAPTER LIST
+   ========================================================= */
+
+function renderManageChapterList() {
+
+  const container =
+    $("manageChapterList");
+
+  if (!container) {
+    return;
+  }
+
+  const subject =
+    getSubjectById(
+      selectedSubjectId
+    );
+
+  if (!subject) {
+    return;
+  }
+
+  container.innerHTML = "";
+
+  if (subject.chapters.length === 0) {
+
+    container.innerHTML = `
+      <div class="empty-state">
+        अजून chapter नाही.
+      </div>
+    `;
+
+    return;
+  }
+
+  subject.chapters.forEach(
+    (chapter, index) => {
+
+      const row =
+        document.createElement("div");
+
+      row.className =
+        "manage-chapter-row";
+
+      row.innerHTML = `
+
+        <div class="chapter-order">
+          ${index + 1}
+        </div>
+
+        <div class="manage-chapter-name">
+          ${escapeHTML(chapter.name)}
+        </div>
+
+        <button
+          onclick="
+            moveChapterUp(${index})
+          "
+          ${index === 0 ? "disabled" : ""}
+        >
+          ⬆️
+        </button>
+
+        <button
+          onclick="
+            moveChapterDown(${index})
+          "
+          ${
+            index === subject.chapters.length - 1
+              ? "disabled"
+              : ""
+          }
+        >
+          ⬇️
+        </button>
+
+        <button
+          onclick="
+            renameChapter('${chapter.id}')
+          "
+        >
+          ✏️
+        </button>
+
+        <button
+          onclick="
+            deleteChapter('${chapter.id}')
+          "
+        >
+          🗑️
+        </button>
+
+      `;
+
+      container.appendChild(row);
+    }
+  );
+}
+
+
+/* =========================================================
+   ADD CHAPTER
+   ========================================================= */
+
+function addChapter() {
+
+  const subject =
+    getSubjectById(
+      selectedSubjectId
+    );
+
+  if (!subject) {
+    return;
+  }
+
+  const name =
+    prompt(
+      "नवीन Chapter चे नाव टाका:"
+    );
+
+  if (name === null) {
+    return;
+  }
+
+  const chapterName =
+    name.trim();
+
+  if (!chapterName) {
+
+    alert(
+      "⚠️ Chapter चे नाव रिकामे ठेवू नका."
+    );
+
+    return;
+  }
+
+  const chapter = {
+    id: createId("chapter"),
+    name: chapterName
+  };
+
+  subject.chapters.push(chapter);
+
+  saveData();
+
+  manageChapters();
+}
+
+
+/* =========================================================
+   RENAME CHAPTER
+   ========================================================= */
+
+function renameChapter(chapterId) {
+
+  const chapter =
+    getChapter(
+      selectedSubjectId,
+      chapterId
+    );
+
+  if (!chapter) {
+    return;
+  }
+
+  const newName =
+    prompt(
+      "Chapter चे नवीन नाव:",
+      chapter.name
+    );
+
+  if (newName === null) {
+    return;
+  }
+
+  const cleanName =
+    newName.trim();
+
+  if (!cleanName) {
+
+    alert(
+      "⚠️ Chapter चे नाव रिकामे ठेवता येणार नाही."
+    );
+
+    return;
+  }
+
+  chapter.name =
+    cleanName;
+
+  saveData();
+
+  manageChapters();
+}
+
+
+/* =========================================================
+   DELETE CHAPTER
+   ========================================================= */
+
+function deleteChapter(chapterId) {
+
+  const subject =
+    getSubjectById(
+      selectedSubjectId
+    );
+
+  if (!subject) {
+    return;
+  }
+
+  const chapter =
+    getChapter(
+      selectedSubjectId,
+      chapterId
+    );
+
+  if (!chapter) {
+    return;
+  }
+
+  const confirmed =
+    confirm(
+      "⚠️ हा chapter delete करायचा आहे का?\n\n" +
+      chapter.name +
+      "\n\n" +
+      त्याचा revision progress देखील delete होईल."
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  subject.chapters =
+    subject.chapters.filter(
+      item => item.id !== chapterId
+    );
+
+  delete data.revisions[
+    getRevisionKey(
+      selectedSubjectId,
+      chapterId
+    )
+  ];
+
+  saveData();
+
+  manageChapters();
+}
+
+
+/* =========================================================
+   MOVE CHAPTER UP
+   ========================================================= */
+
+function moveChapterUp(index) {
+
+  const subject =
+    getSubjectById(
+      selectedSubjectId
+    );
+
+  if (!subject) {
+    return;
+  }
+
+  if (index <= 0) {
+    return;
+  }
+
+  const temp =
+    subject.chapters[index - 1];
+
+  subject.chapters[index - 1] =
+    subject.chapters[index];
+
+  subject.chapters[index] =
+    temp;
+
+  saveData();
+
+  renderManageChapterList();
+}
+
+
+/* =========================================================
+   MOVE CHAPTER DOWN
+   ========================================================= */
+
+function moveChapterDown(index) {
+
+  const subject =
+    getSubjectById(
+      selectedSubjectId
+    );
+
+  if (!subject) {
+    return;
+  }
+
+  if (
+    index >=
+    subject.chapters.length - 1
+  ) {
+    return;
+  }
+
+  const temp =
+    subject.chapters[index + 1];
+
+  subject.chapters[index + 1] =
+    subject.chapters[index];
+
+  subject.chapters[index] =
+    temp;
+
+  saveData();
+
+  renderManageChapterList();
+}
+
+
+/* =========================================================
+   TODAY PAGE
+   ========================================================= */
+
+function renderToday() {
+
+  const list =
+    $("todayList");
+
+  if (!list) {
+    return;
+  }
+
+  list.innerHTML = "";
+
+  const due =
+    getDueRevisions();
+
+  const countElement =
+    $("todayCount");
+
+  if (countElement) {
+
+    countElement.textContent =
+      due.length +
+      " revisions today";
+  }
+
+  if (due.length === 0) {
+
+    list.innerHTML = `
+      <div class="empty-state">
+
+        <h3>🎉 No Revision Due Today!</h3>
+
+        <p>
+          आजची सर्व revision पूर्ण झाली आहेत
+          किंवा अजून revision due नाही.
+        </p>
+
+      </div>
+    `;
+
+    return;
+  }
+
+  due.forEach(item => {
+
+    const card =
+      document.createElement("div");
+
+    card.className =
+      "today-card";
+
+    card.innerHTML = `
+
+      <h3>
+        ${escapeHTML(item.subjectIcon)}
+        ${escapeHTML(item.subjectName)}
+      </h3>
+
+      <p>
+        ${escapeHTML(item.chapterName)}
+      </p>
+
+      <strong>
+        📅 Day ${item.day}
+      </strong>
+
+      <button
+        class="today-btn"
+        onclick="
+          completeRevision(
+            '${item.subjectId}',
+            '${item.chapterId}',
+            ${item.day}
+          )
+        "
+      >
+        ✅ Complete Revision
+      </button>
+
+    `;
+
+    list.appendChild(card);
+  });
+}
+
+
+/* =========================================================
+   PROGRESS PAGE
+   ========================================================= */
+
+function renderProgress() {
+
+  const overall =
+    getOverallProgress();
+
+  const overallElements = [
+    $("progressPercent"),
+    $("overallProgress"),
+    $("progressPagePercent")
+  ];
+
+  overallElements.forEach(element => {
+
+    if (element) {
+      element.textContent =
+        overall + "%";
+    }
+  });
+
+  const list =
+    $("progressList");
+
+  if (!list) {
+    return;
+  }
+
+  list.innerHTML = "";
+
+  data.subjects.forEach(subject => {
+
+    const percent =
+      getSubjectProgress(
+        subject.id
+      );
+
+    const card =
+      document.createElement("div");
+
+    card.className =
+      "progress-subject-card";
+
+    card.innerHTML = `
+
+      <div class="progress-subject-top">
+
+        <strong>
+          ${escapeHTML(subject.icon)}
+          ${escapeHTML(subject.name)}
+        </strong>
+
+        <strong>
+          ${percent}%
+        </strong>
+
+      </div>
+
+      <div class="progress-bar">
+
+        <div
+          class="progress-fill"
+          style="width:${percent}%"
+        ></div>
+
+      </div>
+
+      <p>
+        ${subject.chapters.length}
+        chapters
+      </p>
+
+    `;
+
+    list.appendChild(card);
+
+    renderChapterProgress(
+      subject,
+      card
+    );
+  });
+}
+
+
+/* =========================================================
+   CHAPTER PROGRESS
+   ========================================================= */
+
+function renderChapterProgress(
+  subject,
+  parent
+) {
+
+  if (!subject.chapters.length) {
+    return;
+  }
+
+  const container =
+    document.createElement("div");
+
+  container.className =
+    "chapter-progress-list";
+
+  subject.chapters.forEach(
+    (chapter, index) => {
+
+      const percent =
+        getChapterPercent(
+          subject.id,
+          chapter.id
+        );
+
+      const row =
+        document.createElement("div");
+
+      row.className =
+        "chapter-progress-row";
+
+      row.innerHTML = `
+
+        <span>
+          ${index + 1}.
+          ${escapeHTML(chapter.name)}
+        </span>
+
+        <span>
+          ${percent}%
+        </span>
+
+      `;
+
+      container.appendChild(row);
+    }
+  );
+
+  parent.appendChild(container);
+}
+
+
+/* =========================================================
+   COUNTDOWN
+   ========================================================= */
+
+function renderCountdown() {
+
+  const daysElement =
+    $("countdownDays");
+
+  const hoursElement =
+    $("countdownHours");
+
+  const minutesElement =
+    $("countdownMinutes");
+
+  if (
+    !daysElement &&
+    !hoursElement &&
+    !minutesElement
+  ) {
+    return;
+  }
+
+  const examDate =
+    data.settings.examDate;
+
+  if (!examDate) {
+
+    if (daysElement) {
+      daysElement.textContent = "--";
+    }
+
+    if (hoursElement) {
+      hoursElement.textContent = "--";
+    }
+
+    if (minutesElement) {
+      minutesElement.textContent = "--";
+    }
+
+    return;
+  }
+
+  const target =
+    new Date(
+      examDate + "T00:00:00"
+    ).getTime();
+
+  const now =
+    Date.now();
+
+  let difference =
+    target - now;
+
+  if (difference < 0) {
+    difference = 0;
+  }
+
+  const totalMinutes =
+    Math.floor(
+      difference / 60000
+    );
+
+  const days =
+    Math.floor(
+      totalMinutes / 1440
+    );
+
+  const hours =
+    Math.floor(
+      (totalMinutes % 1440) / 60
+    );
+
+  const minutes =
+    totalMinutes % 60;
+
+  if (daysElement) {
+    daysElement.textContent =
+      days;
+  }
+
+  if (hoursElement) {
+    hoursElement.textContent =
+      hours;
+  }
+
+  if (minutesElement) {
+    minutesElement.textContent =
+      minutes;
+  }
+}
+
+
+/* =========================================================
+   SET EXAM DATE
+   ========================================================= */
+
+function setExamDate() {
+
+  const date =
+    prompt(
+      "HSC Exam Date टाका.\n\n" +
+      "Format: YYYY-MM-DD"
+    );
+
+  if (date === null) {
+    return;
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+
+    alert(
+      "⚠️ Date format चुकीचा आहे."
+    );
+
+    return;
+  }
+
+  data.settings.examDate =
+    date;
+
+  saveData();
+
+  renderCountdown();
+}
+
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+function renderBadges() {
+
+  const container =
+    $("badges");
+
+  if (!container) {
+    return;
+  }
+
+  const badges =
+    getBadges();
+
+  container.innerHTML = "";
+
+  if (badges.length === 0) {
+
+    container.innerHTML = `
+      <p>
+        Complete revisions to unlock badges 🏆
+      </p>
+    `;
+
+    return;
+  }
+
+  badges.forEach(badge => {
+
+    const item =
+      document.createElement("div");
+
+    item.className =
+      "badge";
+
+    item.textContent =
+      badge;
+
+    container.appendChild(item);
+  });
+}
+
+
+/* =========================================================
+   GLOBAL REFRESH
+   ========================================================= */
+
+function refreshApp() {
+
+  renderHome();
+  renderSubject();
+  renderToday();
+  renderProgress();
+  renderCountdown();
+  renderBadges();
+}
+
+
+/* =========================================================
+   RESET ALL DATA
+   ========================================================= */
+
+function resetAllData() {
+
+  const confirmed =
+    confirm(
+      "⚠️ WARNING\n\n" +
+      "सगळे chapters, revisions, XP आणि streak delete होतील.\n\n" +
+      "हा action undo करता येणार नाही.\n\n" +
+      "Continue?"
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  localStorage.removeItem(
+    STORAGE_KEY
+  );
+
+  data =
+    createDefaultData();
+
+  selectedSubjectId = null;
+
+  alert(
+    "✅ App data reset झाले."
+  );
+
+  location.reload();
+}
+
+
+/* =========================================================
+   ADD SUBJECT
+   ========================================================= */
+
+function addSubject() {
+
+  const name =
+    prompt(
+      "नवीन Subject चे नाव:"
+    );
+
+  if (name === null) {
+    return;
+  }
+
+  const cleanName =
+    name.trim();
+
+  if (!cleanName) {
+    return;
+  }
+
+  const exists =
+    data.subjects.some(
+      subject =>
+        subject.name.toLowerCase() ===
+        cleanName.toLowerCase()
+    );
+
+  if (exists) {
+
+    alert(
+      "⚠️ हा subject आधीच आहे."
+    );
+
+    return;
+  }
+
+  data.subjects.push({
+    id: createId("subject"),
+    name: cleanName,
+    icon: "📚",
+    chapters: []
+  });
+
+  saveData();
+
+  renderHome();
+}
+
+
+/* =========================================================
+   DELETE SUBJECT
+   ========================================================= */
+
+function deleteSubject(subjectId) {
+
+  const subject =
+    getSubjectById(subjectId);
+
+  if (!subject) {
+    return;
+  }
+
+  const confirmed =
+    confirm(
+      "⚠️ " +
+      subject.name +
+      "\n\n" +
+      "हा पूर्ण subject आणि त्याचे chapters delete करायचे आहेत का?"
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  subject.chapters.forEach(
+    chapter => {
+
+      delete data.revisions[
+        getRevisionKey(
+          subject.id,
+          chapter.id
+        )
+      ];
+    }
+  );
+
+  data.subjects =
+    data.subjects.filter(
+      item => item.id !== subjectId
+    );
+
+  if (
+    selectedSubjectId === subjectId
+  ) {
+    selectedSubjectId = null;
+  }
+
+  saveData();
+
+  renderHome();
+}
+
+
+/* =========================================================
+   INITIALIZATION
+   ========================================================= */
+
+function initializeApp() {
+
+  console.log(
+    "Revision Rules " +
+    APP_VERSION +
+    " loaded successfully."
+  );
+
+  if (
+    data.subjects.length &&
+    !selectedSubjectId
+  ) {
+
+    selectedSubjectId =
+      data.subjects[0].id;
+  }
+
+  renderHome();
+  renderToday();
+  renderProgress();
+  renderCountdown();
+  renderBadges();
+
+  setInterval(
+    renderCountdown,
+    60000
+  );
+}
+
+
+/* =========================================================
+   SAFE START
+   ========================================================= */
+
+if (
+  document.readyState === "loading"
+) {
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    initializeApp
+  );
+
+} else {
+
+  initializeApp();
+}
+
+
+/* =========================================================
+   GLOBAL FUNCTIONS
+   Required because index.html uses onclick=""
+   ========================================================= */
+
+window.showPage =
+  showPage;
+
+window.openSubject =
+  openSubject;
+
+window.startRevision =
+  startRevision;
+
+window.completeRevision =
+  completeRevision;
+
+window.renderSubject =
+  renderSubject;
+
+window.renderToday =
+  renderToday;
+
+window.renderProgress =
+  renderProgress;
+
+window.manageChapters =
+  manageChapters;
+
+window.addChapter =
+  addChapter;
+
+window.renameChapter =
+  renameChapter;
+
+window.deleteChapter =
+  deleteChapter;
+
+window.moveChapterUp =
+  moveChapterUp;
+
+window.moveChapterDown =
+  moveChapterDown;
+
+window.setExamDate =
+  setExamDate;
+
+window.addSubject =
+  addSubject;
+
+window.deleteSubject =
+  deleteSubject;
+
+window.resetAllData =
+  resetAllData;
+
+
+/* =========================================================
+   END
+   ========================================================= */
