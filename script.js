@@ -1,807 +1,1024 @@
-a();
+/* =========================================================
+   REVISION RULES
+   HSC SMART REVISION TRACKER
+   ---------------------------------------------------------
+   Revision System:
+   Day 1 → Day 3 → Day 7
 
-  const chapter =
-    getChapter(
-      subjectId,
-      chapterId
+   Features:
+   - Unlimited chapters
+   - Custom chapter names
+   - Custom chapter order
+   - Add / Delete / Move chapters
+   - Progress tracking
+   - XP
+   - Streak
+   - Badges
+   - Today's revision
+   - HSC countdown
+   - LocalStorage
+========================================================= */
+
+
+/* =========================================================
+   CONFIGURATION
+========================================================= */
+
+const CONFIG = {
+  storageKey: "revision_rules_data_v3",
+
+  /*
+    HSC EXAM DATE
+
+    Change this date whenever the official HSC date is known.
+
+    Format:
+    YYYY-MM-DDTHH:MM:SS
+
+    Example:
+    "2027-02-10T10:30:00"
+  */
+  examDate: "2027-02-10T10:30:00"
+};
+
+
+/* =========================================================
+   DEFAULT SUBJECTS
+========================================================= */
+
+const DEFAULT_SUBJECTS = [
+  {
+    id: "physics",
+    name: "Physics",
+    icon: "⚡",
+    chapters: []
+  },
+
+  {
+    id: "chemistry",
+    name: "Chemistry",
+    icon: "🧪",
+    chapters: []
+  },
+
+  {
+    id: "mathematics1",
+    name: "Mathematics 1",
+    icon: "📐",
+    chapters: []
+  },
+
+  {
+    id: "mathematics2",
+    name: "Mathematics 2",
+    icon: "📊",
+    chapters: []
+  },
+
+  {
+    id: "biology",
+    name: "Biology",
+    icon: "🧬",
+    chapters: []
+  },
+
+  {
+    id: "english",
+    name: "English",
+    icon: "📚",
+    chapters: []
+  },
+
+  {
+    id: "marathi",
+    name: "Marathi",
+    icon: "📖",
+    chapters: []
+  }
+];
+
+
+/* =========================================================
+   DATA
+========================================================= */
+
+let data = loadData();
+
+let currentSubjectId = null;
+
+
+/* =========================================================
+   CREATE DEFAULT DATA
+========================================================= */
+
+function createDefaultData() {
+
+  return {
+    subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)),
+
+    revisions: {},
+
+    xp: 0,
+
+    completedDates: [],
+
+    lastRevisionDate: null,
+
+    streak: 0
+  };
+}
+
+
+/* =========================================================
+   LOAD DATA
+========================================================= */
+
+function loadData() {
+
+  try {
+
+    const saved = localStorage.getItem(CONFIG.storageKey);
+
+    if (!saved) {
+      return createDefaultData();
+    }
+
+    const parsed = JSON.parse(saved);
+
+    if (!parsed.subjects) {
+      parsed.subjects = JSON.parse(
+        JSON.stringify(DEFAULT_SUBJECTS)
+      );
+    }
+
+    if (!parsed.revisions) {
+      parsed.revisions = {};
+    }
+
+    if (typeof parsed.xp !== "number") {
+      parsed.xp = 0;
+    }
+
+    if (!Array.isArray(parsed.completedDates)) {
+      parsed.completedDates = [];
+    }
+
+    if (typeof parsed.streak !== "number") {
+      parsed.streak = 0;
+    }
+
+    return parsed;
+
+  } catch (error) {
+
+    console.error("Data loading error:", error);
+
+    return createDefaultData();
+  }
+}
+
+
+/* =========================================================
+   SAVE DATA
+========================================================= */
+
+function saveData() {
+
+  try {
+
+    localStorage.setItem(
+      CONFIG.storageKey,
+      JSON.stringify(data)
     );
 
-  const chapterName =
-    chapter ? chapter.name : "Chapter";
+  } catch (error) {
 
-  alert(
-    "🎉 Revision Completed!\n\n" +
-    chapterName +
-    "\n" +
-    "Day " +
-    revisionDay +
-    " completed.\n\n" +
-    "+10 XP ⭐"
+    console.error("Data saving error:", error);
+  }
+}
+
+
+/* =========================================================
+   DATE HELPERS
+========================================================= */
+
+function getToday() {
+
+  const now = new Date();
+
+  return now.toISOString().split("T")[0];
+}
+
+
+function addDays(dateString, days) {
+
+  const date = new Date(dateString + "T00:00:00");
+
+  date.setDate(date.getDate() + days);
+
+  return date.toISOString().split("T")[0];
+}
+
+
+function isToday(dateString) {
+
+  return dateString === getToday();
+}
+
+
+function datePassed(dateString) {
+
+  if (!dateString) {
+    return false;
+  }
+
+  return dateString <= getToday();
+}
+
+
+/* =========================================================
+   SUBJECT HELPERS
+========================================================= */
+
+function getSubject(subjectId) {
+
+  return data.subjects.find(
+    subject => subject.id === subjectId
   );
+}
 
-  renderSubject();
-  renderToday();
-  renderHome();
-  renderProgress();
+
+function getSubjectByName(name) {
+
+  return data.subjects.find(
+    subject => subject.name === name
+  );
 }
 
 
 /* =========================================================
-   STREAK
-   ========================================================= */
+   CHAPTER DATA
+========================================================= */
 
-function updateStreak() {
+function getChapter(subjectId, chapterId) {
 
-  const today = todayString();
+  const subject = getSubject(subjectId);
 
-  const last =
-    data.streak.lastDate;
-
-  if (!last) {
-
-    data.streak.current = 1;
-    data.streak.best = 1;
-    data.streak.lastDate = today;
-
-    return;
+  if (!subject) {
+    return null;
   }
 
-  if (last === today) {
-    return;
+  return subject.chapters.find(
+    chapter => chapter.id === chapterId
+  );
+}
+
+
+function getRevision(subjectId, chapterId) {
+
+  const key = subjectId + "|" + chapterId;
+
+  if (!data.revisions[key]) {
+
+    data.revisions[key] = {
+
+      day1: false,
+
+      day3: false,
+
+      day7: false,
+
+      dates: {
+
+        day1: null,
+
+        day3: null,
+
+        day7: null
+
+      }
+
+    };
+
   }
 
-  const yesterday =
-    addDays(today, -1);
-
-  if (last === yesterday) {
-
-    data.streak.current += 1;
-
-  } else {
-
-    data.streak.current = 1;
-  }
-
-  if (
-    data.streak.current >
-    data.streak.best
-  ) {
-
-    data.streak.best =
-      data.streak.current;
-  }
-
-  data.streak.lastDate = today;
+  return data.revisions[key];
 }
 
 
 /* =========================================================
-   BADGES
-   ========================================================= */
+   GENERATE UNIQUE ID
+========================================================= */
 
-function getBadges() {
+function createId(prefix) {
 
-  const badges = [];
-
-  if (data.xp >= 10) {
-    badges.push("🌱 First Revision");
-  }
-
-  if (data.xp >= 50) {
-    badges.push("⭐ 50 XP");
-  }
-
-  if (data.xp >= 100) {
-    badges.push("🏆 100 XP");
-  }
-
-  if (data.streak.current >= 3) {
-    badges.push("🔥 3 Day Streak");
-  }
-
-  if (data.streak.current >= 7) {
-    badges.push("🔥 7 Day Streak");
-  }
-
-  if (getOverallProgress() >= 50) {
-    badges.push("📚 Half Way");
-  }
-
-  if (getOverallProgress() === 100) {
-    badges.push("👑 Revision Master");
-  }
-
-  return badges;
+  return (
+    prefix +
+    "_" +
+    Date.now() +
+    "_" +
+    Math.random()
+      .toString(36)
+      .substring(2, 9)
+  );
 }
 
 
 /* =========================================================
-   NAVIGATION
-   ========================================================= */
+   PAGE NAVIGATION
+========================================================= */
 
 function showPage(pageId, button) {
 
-  const pages =
-    document.querySelectorAll(".page");
+  document
+    .querySelectorAll(".page")
+    .forEach(page => {
 
-  pages.forEach(page => {
-    page.classList.remove("active");
-  });
+      page.classList.remove("active");
 
-  const target =
-    document.getElementById(pageId);
+    });
 
-  if (target) {
-    target.classList.add("active");
+
+  const page = document.getElementById(pageId);
+
+  if (page) {
+
+    page.classList.add("active");
+
   }
 
-  const navButtons =
-    document.querySelectorAll(".nav-btn");
 
-  navButtons.forEach(btn => {
-    btn.classList.remove("active");
-  });
+  document
+    .querySelectorAll(".nav-btn")
+    .forEach(btn => {
+
+      btn.classList.remove("active");
+
+    });
+
 
   if (button) {
+
     button.classList.add("active");
+
   }
 
-  if (pageId === "homePage") {
-    renderHome();
-  }
-
-  if (pageId === "subjectPage") {
-    renderSubject();
-  }
 
   if (pageId === "todayPage") {
+
     renderToday();
+
   }
+
 
   if (pageId === "progressPage") {
+
     renderProgress();
+
   }
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+
+  if (pageId === "homePage") {
+
+    renderHome();
+
+  }
 }
 
 
 /* =========================================================
-   HOME
-   ========================================================= */
+   GO HOME
+========================================================= */
 
-function renderHome() {
+function goHome() {
 
-  const percent =
-    getOverallProgress();
+  const homeButton =
+    document.querySelector(
+      ".bottom-nav .nav-btn:first-child"
+    );
 
-  const progressElements = [
-    $("overallPercent"),
-    $("homePercent"),
-    $("overallProgressText")
-  ];
-
-  progressElements.forEach(element => {
-
-    if (element) {
-      element.textContent =
-        percent + "%";
-    }
-  });
-
-  const progressBars = [
-    $("overallProgressBar"),
-    $("homeProgressBar")
-  ];
-
-  progressBars.forEach(element => {
-
-    if (element) {
-      element.style.width =
-        percent + "%";
-    }
-  });
-
-  const streakElement =
-    $("streak");
-
-  if (streakElement) {
-
-    streakElement.textContent =
-      data.streak.current;
-  }
-
-  const xpElement =
-    $("xp");
-
-  if (xpElement) {
-
-    xpElement.textContent =
-      data.xp + " XP";
-  }
-
-  const todayCount =
-    getDueRevisions().length;
-
-  const todayElements = [
-    $("todayCount"),
-    $("todayRevisionCount")
-  ];
-
-  todayElements.forEach(element => {
-
-    if (element) {
-
-      element.textContent =
-        todayCount +
-        " revisions today";
-    }
-  });
-
-  renderSubjectCardsHome();
-  renderCountdown();
-  renderBadges();
-}
-
-
-/* =========================================================
-   HOME SUBJECT CARDS
-   ========================================================= */
-
-function renderSubjectCardsHome() {
-
-  const container =
-    $("subjectList");
-
-  if (!container) {
-    return;
-  }
-
-  container.innerHTML = "";
-
-  data.subjects.forEach(subject => {
-
-    const percent =
-      getSubjectProgress(
-        subject.id
-      );
-
-    const card =
-      document.createElement("div");
-
-    card.className =
-      "subject-card";
-
-    card.innerHTML = `
-      <div class="subject-card-top">
-
-        <div>
-          <span class="subject-icon">
-            ${escapeHTML(subject.icon)}
-          </span>
-
-          <strong>
-            ${escapeHTML(subject.name)}
-          </strong>
-        </div>
-
-        <span>
-          ${percent}%
-        </span>
-
-      </div>
-
-      <div class="progress-bar">
-        <div
-          class="progress-fill"
-          style="width:${percent}%"
-        ></div>
-      </div>
-
-      <button
-        class="subject-open-btn"
-        onclick="openSubject('${subject.id}')"
-      >
-        Open Subject
-      </button>
-    `;
-
-    container.appendChild(card);
-  });
+  showPage("homePage", homeButton);
 }
 
 
 /* =========================================================
    OPEN SUBJECT
-   ========================================================= */
+========================================================= */
 
 function openSubject(subjectId) {
 
-  const subject =
-    getSubjectById(subjectId);
+  const subject = getSubject(subjectId);
 
   if (!subject) {
     return;
   }
 
-  selectedSubjectId =
-    subjectId;
+  currentSubjectId = subjectId;
 
-  showPage(
-    "subjectPage",
-    null
-  );
+  const title =
+    document.getElementById("subjectTitle");
+
+  if (title) {
+    title.textContent = subject.name;
+  }
 
   renderSubject();
+
+  document
+    .querySelectorAll(".page")
+    .forEach(page => {
+
+      page.classList.remove("active");
+
+    });
+
+
+  const subjectPage =
+    document.getElementById("subjectPage");
+
+  if (subjectPage) {
+
+    subjectPage.classList.add("active");
+
+  }
 }
 
 
 /* =========================================================
-   SUBJECT PAGE
-   ========================================================= */
+   OPEN SUBJECT BY NAME
+   ---------------------------------------------------------
+   Kept for compatibility with old HTML.
+========================================================= */
 
-function renderSubject() {
+function openSubjectByName(name) {
 
-  const page =
-    $("subjectPage");
-
-  if (!page) {
-    return;
-  }
-
-  if (!selectedSubjectId) {
-
-    selectedSubjectId =
-      data.subjects.length
-        ? data.subjects[0].id
-        : null;
-  }
-
-  if (!selectedSubjectId) {
-
-    page.innerHTML = `
-      <div class="empty-state">
-        No subjects available.
-      </div>
-    `;
-
-    return;
-  }
-
-  const subject =
-    getSubjectById(
-      selectedSubjectId
-    );
+  const subject = getSubjectByName(name);
 
   if (!subject) {
     return;
   }
 
-  page.innerHTML = `
-    <div class="subject-header">
+  openSubject(subject.id);
+}
 
-      <div>
-        <h2>
-          ${escapeHTML(subject.icon)}
+
+/* =========================================================
+   HOME RENDER
+========================================================= */
+
+function renderHome() {
+
+  renderSubjects();
+
+  updateOverallProgress();
+
+  updateTodayCount();
+
+  updateCountdown();
+
+  updateXP();
+
+  updateStreak();
+}
+
+
+/* =========================================================
+   SUBJECT GRID
+========================================================= */
+
+function renderSubjects() {
+
+  const grid =
+    document.getElementById("subjectGrid");
+
+  if (!grid) {
+    return;
+  }
+
+  grid.innerHTML = "";
+
+
+  data.subjects.forEach(subject => {
+
+    const percent =
+      getSubjectProgress(subject.id);
+
+
+    const card =
+      document.createElement("div");
+
+    card.className = "subject-card";
+
+    card.style.cursor = "pointer";
+
+
+    card.innerHTML = `
+
+      <div class="subject-icon">
+        ${subject.icon}
+      </div>
+
+      <div class="subject-info">
+
+        <h3>
           ${escapeHTML(subject.name)}
-        </h2>
+        </h3>
 
         <p>
-          ${subject.chapters.length}
-          chapters
+          ${subject.chapters.length} chapters
         </p>
+
+        <div class="mini-progress">
+          <div
+            style="width:${percent}%">
+          </div>
+        </div>
+
+        <strong>
+          ${percent}%
+        </strong>
+
       </div>
+    `;
 
-      <button
-        class="manage-btn"
-        onclick="manageChapters()"
-      >
-        ⚙️ Manage Chapters
-      </button>
 
-    </div>
+    card.addEventListener(
+      "click",
+      function () {
 
-    <div class="subject-progress-box">
+        openSubject(subject.id);
 
-      <div>
-        <strong>Subject Progress</strong>
-      </div>
+      }
+    );
 
-      <div class="progress-bar">
-        <div
-          class="progress-fill"
-          style="width:${getSubjectProgress(subject.id)}%"
-        ></div>
-      </div>
 
-      <strong>
-        ${getSubjectProgress(subject.id)}%
-      </strong>
+    grid.appendChild(card);
 
-    </div>
+  });
+}
 
-    <div class="chapter-list" id="chapterList"></div>
-  `;
+
+/* =========================================================
+   SUBJECT RENDER
+========================================================= */
+
+function renderSubject() {
+
+  if (!currentSubjectId) {
+    return;
+  }
+
+  const subject =
+    getSubject(currentSubjectId);
+
+  if (!subject) {
+    return;
+  }
+
+
+  const title =
+    document.getElementById("subjectTitle");
+
+  if (title) {
+
+    title.textContent =
+      subject.icon + " " + subject.name;
+
+  }
+
+
+  const percent =
+    getSubjectProgress(subject.id);
+
+
+  const percentElement =
+    document.getElementById("subjectPercent");
+
+  if (percentElement) {
+
+    percentElement.textContent =
+      percent + "%";
+
+  }
+
+
+  const progressText =
+    document.getElementById(
+      "subjectProgressText"
+    );
+
+  if (progressText) {
+
+    progressText.textContent =
+      percent + "%";
+
+  }
+
+
+  const progressBar =
+    document.getElementById(
+      "subjectProgressBar"
+    );
+
+  if (progressBar) {
+
+    progressBar.style.width =
+      percent + "%";
+
+  }
+
+
+  renderChapterList(subject);
+}
+
+
+/* =========================================================
+   CHAPTER LIST
+========================================================= */
+
+function renderChapterList(subject) {
 
   const list =
-    $("chapterList");
+    document.getElementById("chapterList");
 
   if (!list) {
     return;
   }
 
-  if (subject.chapters.length === 0) {
 
-    list.innerHTML = `
-      <div class="empty-state">
-
-        <h3>📚 No Chapters Yet</h3>
-
-        <p>
-          तुझ्या मते chapter add करण्यासाठी
-          खालील button वापर.
-        </p>
-
-        <button
-          class="add-chapter-btn"
-          onclick="addChapter()"
-        >
-          ➕ Add First Chapter
-        </button>
-
-      </div>
-    `;
-
-    return;
-  }
-
-  subject.chapters.forEach(
-    (chapter, index) => {
-
-      list.appendChild(
-        createChapterCard(
-          subject,
-          chapter,
-          index
-        )
-      );
-    }
-  );
-}
+  list.innerHTML = "";
 
 
-/* =========================================================
-   CHAPTER CARD
-   ========================================================= */
+  /*
+    ADD CHAPTER BUTTON
+  */
 
-function createChapterCard(
-  subject,
-  chapter,
-  index
-) {
-
-  const revision =
-    getRevision(
-      subject.id,
-      chapter.id
-    );
-
-  const percent =
-    getChapterPercent(
-      subject.id,
-      chapter.id
-    );
-
-  const card =
+  const controls =
     document.createElement("div");
 
-  card.className =
-    "chapter-card";
-
-  const started =
-    Boolean(revision.startedDate);
-
-  card.innerHTML = `
-
-    <div class="chapter-top">
-
-      <div class="chapter-name">
-        ${index + 1}.
-        ${escapeHTML(chapter.name)}
-      </div>
-
-      <div class="chapter-percent">
-        ${percent}%
-      </div>
-
-    </div>
-
-    <div class="chapter-progress">
-
-      <div
-        class="chapter-progress-fill"
-        style="width:${percent}%"
-      ></div>
-
-    </div>
-
-    <div class="revision-info">
-
-      <div>
-        Revision:
-      </div>
-
-      <div>
-        ${revision.day1
-          ? "✅ Day 1"
-          : "⬜ Day 1"}
-      </div>
-
-      <div>
-        ${revision.day3
-          ? "✅ Day 3"
-          : "⬜ Day 3"}
-      </div>
-
-      <div>
-        ${revision.day7
-          ? "✅ Day 7"
-          : "⬜ Day 7"}
-      </div>
-
-    </div>
-
-    <div class="revision-buttons">
-
-      ${
-        !started
-        ? `
-          <button
-            onclick="
-              startRevision(
-                '${subject.id}',
-                '${chapter.id}'
-              )
-            "
-          >
-            ▶️ Start Revision
-          </button>
-        `
-        : ""
-      }
-
-      ${
-        started
-        ? `
-          <button
-            class="${revision.day1 ? "done" : ""}"
-            ${
-              revision.day1
-                ? "disabled"
-                : `
-                  onclick="
-                    completeRevision(
-                      '${subject.id}',
-                      '${chapter.id}',
-                      1
-                    )
-                  "
-                `
-            }
-          >
-            Day 1
-          </button>
-
-          <button
-            class="${revision.day3 ? "done" : ""}"
-            ${
-              revision.day3
-                ? "disabled"
-                : `
-                  onclick="
-                    completeRevision(
-                      '${subject.id}',
-                      '${chapter.id}',
-                      3
-                    )
-                  "
-                `
-            }
-          >
-            Day 3
-          </button>
-
-          <button
-            class="${revision.day7 ? "done" : ""}"
-            ${
-              revision.day7
-                ? "disabled"
-                : `
-                  onclick="
-                    completeRevision(
-                      '${subject.id}',
-                      '${chapter.id}',
-                      7
-                    )
-                  "
-                `
-            }
-          >
-            Day 7
-          </button>
-        `
-        : ""
-      }
-
-    </div>
-
-  `;
-
-  return card;
-}
+  controls.className =
+    "chapter-controls";
 
 
-/* =========================================================
-   CHAPTER MANAGEMENT
-   ========================================================= */
-
-function manageChapters() {
-
-  const subject =
-    getSubjectById(
-      selectedSubjectId
-    );
-
-  if (!subject) {
-    return;
-  }
-
-  const page =
-    $("subjectPage");
-
-  if (!page) {
-    return;
-  }
-
-  page.innerHTML = `
-    <div class="manage-header">
-
-      <button
-        onclick="renderSubject()"
-      >
-        ← Back
-      </button>
-
-      <h2>
-        ⚙️ Manage Chapters
-      </h2>
-
-    </div>
-
-    <div class="manage-info">
-
-      <p>
-        ${escapeHTML(subject.name)}
-      </p>
-
-      <p>
-        Chapter चा क्रम पूर्णपणे तुझ्या हातात आहे.
-      </p>
-
-    </div>
+  controls.innerHTML = `
 
     <button
-      class="add-chapter-btn"
-      onclick="addChapter()"
-    >
+      type="button"
+      class="add-chapter-btn">
       ➕ Add Chapter
     </button>
 
-    <div id="manageChapterList"></div>
   `;
 
-  renderManageChapterList();
-}
 
+  controls
+    .querySelector(".add-chapter-btn")
+    .addEventListener(
+      "click",
+      function () {
 
-/* =========================================================
-   MANAGE CHAPTER LIST
-   ========================================================= */
+        addChapter(subject.id);
 
-function renderManageChapterList() {
-
-  const container =
-    $("manageChapterList");
-
-  if (!container) {
-    return;
-  }
-
-  const subject =
-    getSubjectById(
-      selectedSubjectId
+      }
     );
 
-  if (!subject) {
-    return;
-  }
 
-  container.innerHTML = "";
+  list.appendChild(controls);
+
+
+  /*
+    NO CHAPTERS
+  */
 
   if (subject.chapters.length === 0) {
 
-    container.innerHTML = `
-      <div class="empty-state">
-        अजून chapter नाही.
-      </div>
+    const empty =
+      document.createElement("div");
+
+    empty.className =
+      "empty-chapters";
+
+
+    empty.innerHTML = `
+
+      <p>📚 No chapters added yet.</p>
+
+      <p>
+        Tap <strong>➕ Add Chapter</strong>
+        to add your first chapter.
+      </p>
+
     `;
+
+
+    list.appendChild(empty);
 
     return;
   }
+
+
+  /*
+    CHAPTERS
+  */
 
   subject.chapters.forEach(
     (chapter, index) => {
 
-      const row =
+      const card =
         document.createElement("div");
 
-      row.className =
-        "manage-chapter-row";
+      card.className =
+        "chapter-card";
 
-      row.innerHTML = `
 
-        <div class="chapter-order">
-          ${index + 1}
+      const revision =
+        getRevision(
+          subject.id,
+          chapter.id
+        );
+
+
+      const completed =
+        [
+          revision.day1,
+          revision.day3,
+          revision.day7
+        ].filter(Boolean).length;
+
+
+      const percent =
+        Math.round(
+          (completed / 3) * 100
+        );
+
+
+      card.innerHTML = `
+
+        <div class="chapter-top">
+
+          <div class="chapter-name">
+
+            <span class="chapter-number">
+              ${index + 1}.
+            </span>
+
+            ${escapeHTML(chapter.name)}
+
+          </div>
+
+          <div class="chapter-percent">
+            ${percent}%
+          </div>
+
         </div>
 
-        <div class="manage-chapter-name">
-          ${escapeHTML(chapter.name)}
+
+        <div class="chapter-progress">
+
+          <div
+            style="width:${percent}%">
+          </div>
+
         </div>
 
-        <button
-          onclick="
-            moveChapterUp(${index})
-          "
-          ${index === 0 ? "disabled" : ""}
-        >
-          ⬆️
-        </button>
 
-        <button
-          onclick="
-            moveChapterDown(${index})
-          "
+        <div class="revision-info">
+
+          <div>
+            Revision
+          </div>
+
+          <div class="revision-status">
+
+            <span
+              class="${revision.day1 ? "completed" : ""}">
+              ${revision.day1 ? "✅" : "⬜"}
+              Day 1
+            </span>
+
+            <span
+              class="${revision.day3 ? "completed" : ""}">
+              ${revision.day3 ? "✅" : "⬜"}
+              Day 3
+            </span>
+
+            <span
+              class="${revision.day7 ? "completed" : ""}">
+              ${revision.day7 ? "✅" : "⬜"}
+              Day 7
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="revision-buttons">
+
           ${
-            index === subject.chapters.length - 1
-              ? "disabled"
-              : ""
+            !revision.day1
+            ? `
+              <button
+                type="button"
+                class="revision-btn"
+                data-revision="day1">
+                Day 1
+              </button>
+            `
+            : `
+              <button
+                type="button"
+                class="revision-btn done"
+                disabled>
+                ✅ Day 1
+              </button>
+            `
           }
-        >
-          ⬇️
-        </button>
 
-        <button
-          onclick="
-            renameChapter('${chapter.id}')
-          "
-        >
-          ✏️
-        </button>
 
-        <button
-          onclick="
-            deleteChapter('${chapter.id}')
-          "
-        >
-          🗑️
-        </button>
+          ${
+            revision.day1 && !revision.day3
+            ? `
+              <button
+                type="button"
+                class="revision-btn"
+                data-revision="day3">
+                Day 3
+              </button>
+            `
+            : `
+              <button
+                type="button"
+                class="revision-btn ${revision.day3 ? "done" : ""}"
+                ${revision.day3 ? "disabled" : "disabled"}>
+                ${revision.day3 ? "✅" : "🔒"}
+                Day 3
+              </button>
+            `
+          }
+
+
+          ${
+            revision.day3 && !revision.day7
+            ? `
+              <button
+                type="button"
+                class="revision-btn"
+                data-revision="day7">
+                Day 7
+              </button>
+            `
+            : `
+              <button
+                type="button"
+                class="revision-btn ${revision.day7 ? "done" : ""}"
+                disabled>
+                ${revision.day7 ? "✅" : "🔒"}
+                Day 7
+              </button>
+            `
+          }
+
+        </div>
+
+
+        <div class="chapter-management">
+
+          <button
+            type="button"
+            class="small-action edit">
+            ✏️ Edit
+          </button>
+
+          <button
+            type="button"
+            class="small-action up">
+            ⬆️
+          </button>
+
+          <button
+            type="button"
+            class="small-action down">
+            ⬇️
+          </button>
+
+          <button
+            type="button"
+            class="small-action delete">
+            🗑️
+          </button>
+
+        </div>
 
       `;
 
-      container.appendChild(row);
+
+      /*
+        REVISION BUTTONS
+      */
+
+      card
+        .querySelectorAll(
+          "[data-revision]"
+        )
+        .forEach(button => {
+
+          button.addEventListener(
+            "click",
+            function () {
+
+              completeRevision(
+                subject.id,
+                chapter.id,
+                button.dataset.revision
+              );
+
+            }
+          );
+
+        });
+
+
+      /*
+        EDIT
+      */
+
+      card
+        .querySelector(".edit")
+        .addEventListener(
+          "click",
+          function () {
+
+            editChapter(
+              subject.id,
+              chapter.id
+            );
+
+          }
+        );
+
+
+      /*
+        MOVE UP
+      */
+
+      card
+        .querySelector(".up")
+        .addEventListener(
+          "click",
+          function () {
+
+            moveChapter(
+              subject.id,
+              index,
+              -1
+            );
+
+          }
+        );
+
+
+      /*
+        MOVE DOWN
+      */
+
+      card
+        .querySelector(".down")
+        .addEventListener(
+          "click",
+          function () {
+
+            moveChapter(
+              subject.id,
+              index,
+              1
+            );
+
+          }
+        );
+
+
+      /*
+        DELETE
+      */
+
+      card
+        .querySelector(".delete")
+        .addEventListener(
+          "click",
+          function () {
+
+            deleteChapter(
+              subject.id,
+              chapter.id
+            );
+
+          }
+        );
+
+
+      list.appendChild(card);
+
     }
   );
 }
@@ -809,62 +1026,73 @@ function renderManageChapterList() {
 
 /* =========================================================
    ADD CHAPTER
-   ========================================================= */
+========================================================= */
 
-function addChapter() {
+function addChapter(subjectId) {
 
   const subject =
-    getSubjectById(
-      selectedSubjectId
-    );
+    getSubject(subjectId);
 
   if (!subject) {
     return;
   }
 
+
   const name =
     prompt(
-      "नवीन Chapter चे नाव टाका:"
+      "Chapter चे नाव टाका:"
     );
+
 
   if (name === null) {
     return;
   }
 
-  const chapterName =
+
+  const cleanName =
     name.trim();
 
-  if (!chapterName) {
+
+  if (!cleanName) {
 
     alert(
-      "⚠️ Chapter चे नाव रिकामे ठेवू नका."
+      "Chapter चे नाव रिकामे ठेवू नका."
     );
 
     return;
   }
 
-  const chapter = {
-    id: createId("chapter"),
-    name: chapterName
-  };
 
-  subject.chapters.push(chapter);
+  subject.chapters.push({
+
+    id: createId("chapter"),
+
+    name: cleanName
+
+  });
+
 
   saveData();
 
-  manageChapters();
+  renderSubject();
+
+  renderHome();
+
 }
 
 
 /* =========================================================
-   RENAME CHAPTER
-   ========================================================= */
+   EDIT CHAPTER
+========================================================= */
 
-function renameChapter(chapterId) {
+function editChapter(
+  subjectId,
+  chapterId
+) {
 
   const chapter =
     getChapter(
-      selectedSubjectId,
+      subjectId,
       chapterId
     );
 
@@ -872,55 +1100,65 @@ function renameChapter(chapterId) {
     return;
   }
 
+
   const newName =
     prompt(
-      "Chapter चे नवीन नाव:",
+      "Chapter चे नवीन नाव टाका:",
       chapter.name
     );
+
 
   if (newName === null) {
     return;
   }
 
+
   const cleanName =
     newName.trim();
+
 
   if (!cleanName) {
 
     alert(
-      "⚠️ Chapter चे नाव रिकामे ठेवता येणार नाही."
+      "Chapter चे नाव रिकामे ठेवता येणार नाही."
     );
 
     return;
   }
 
-  chapter.name =
-    cleanName;
+
+  chapter.name = cleanName;
+
 
   saveData();
 
-  manageChapters();
+  renderSubject();
+
+  renderHome();
+
 }
 
 
 /* =========================================================
    DELETE CHAPTER
-   ========================================================= */
+========================================================= */
 
-function deleteChapter(chapterId) {
+function deleteChapter(
+  subjectId,
+  chapterId
+) {
 
   const subject =
-    getSubjectById(
-      selectedSubjectId
-    );
+    getSubject(subjectId);
 
   if (!subject) {
     return;
   }
 
+
   const chapter =
     getChapter(
-      selectedSubjectId,
+      subjectId,
       chapterId
     );
 
@@ -928,704 +1166,1287 @@ function deleteChapter(chapterId) {
     return;
   }
 
+
   const confirmed =
     confirm(
-      "⚠️ हा chapter delete करायचा आहे का?\n\n" +
-      chapter.name +
-      "\n\n" +
-      त्याचा revision progress देखील delete होईल."
+      `"${chapter.name}" delete करायचा आहे का?`
     );
+
 
   if (!confirmed) {
     return;
   }
+
 
   subject.chapters =
     subject.chapters.filter(
       item => item.id !== chapterId
     );
 
-  delete data.revisions[
-    getRevisionKey(
-      selectedSubjectId,
-      chapterId
-    )
-  ];
+
+  /*
+    Delete revision data too
+  */
+
+  const key =
+    subjectId + "|" + chapterId;
+
+  delete data.revisions[key];
+
 
   saveData();
 
-  manageChapters();
+  renderSubject();
+
+  renderHome();
+
 }
 
 
 /* =========================================================
-   MOVE CHAPTER UP
-   ========================================================= */
+   MOVE CHAPTER
+========================================================= */
 
-function moveChapterUp(index) {
+function moveChapter(
+  subjectId,
+  index,
+  direction
+) {
 
   const subject =
-    getSubjectById(
-      selectedSubjectId
-    );
+    getSubject(subjectId);
 
   if (!subject) {
     return;
   }
 
-  if (index <= 0) {
-    return;
-  }
 
-  const temp =
-    subject.chapters[index - 1];
+  const newIndex =
+    index + direction;
 
-  subject.chapters[index - 1] =
-    subject.chapters[index];
-
-  subject.chapters[index] =
-    temp;
-
-  saveData();
-
-  renderManageChapterList();
-}
-
-
-/* =========================================================
-   MOVE CHAPTER DOWN
-   ========================================================= */
-
-function moveChapterDown(index) {
-
-  const subject =
-    getSubjectById(
-      selectedSubjectId
-    );
-
-  if (!subject) {
-    return;
-  }
 
   if (
-    index >=
-    subject.chapters.length - 1
+    newIndex < 0 ||
+    newIndex >= subject.chapters.length
   ) {
+
     return;
   }
 
-  const temp =
-    subject.chapters[index + 1];
 
-  subject.chapters[index + 1] =
+  const temp =
     subject.chapters[index];
 
+
   subject.chapters[index] =
+    subject.chapters[newIndex];
+
+
+  subject.chapters[newIndex] =
     temp;
+
 
   saveData();
 
-  renderManageChapterList();
+  renderSubject();
+
 }
 
 
 /* =========================================================
-   TODAY PAGE
-   ========================================================= */
+   COMPLETE REVISION
+========================================================= */
+
+function completeRevision(
+  subjectId,
+  chapterId,
+  revision
+) {
+
+  const chapter =
+    getChapter(
+      subjectId,
+      chapterId
+    );
+
+  if (!chapter) {
+    return;
+  }
+
+
+  const r =
+    getRevision(
+      subjectId,
+      chapterId
+    );
+
+
+  /*
+    Prevent duplicate completion
+  */
+
+  if (r[revision]) {
+    return;
+  }
+
+
+  /*
+    Check revision order
+  */
+
+  if (
+    revision === "day3" &&
+    !r.day1
+  ) {
+
+    alert(
+      "आधी Day 1 revision पूर्ण करा."
+    );
+
+    return;
+  }
+
+
+  if (
+    revision === "day7" &&
+    !r.day3
+  ) {
+
+    alert(
+      "आधी Day 3 revision पूर्ण करा."
+    );
+
+    return;
+  }
+
+
+  /*
+    Check due date
+  */
+
+  const today =
+    getToday();
+
+
+  if (revision === "day3") {
+
+    const due =
+      r.dates.day3;
+
+
+    if (
+      due &&
+      due > today
+    ) {
+
+      alert(
+        "Day 3 revision अजून due झालेली नाही.\n\nDue date: " +
+        due
+      );
+
+      return;
+    }
+  }
+
+
+  if (revision === "day7") {
+
+    const due =
+      r.dates.day7;
+
+
+    if (
+      due &&
+      due > today
+    ) {
+
+      alert(
+        "Day 7 revision अजून due झालेली नाही.\n\nDue date: " +
+        due
+      );
+
+      return;
+    }
+  }
+
+
+  /*
+    Mark complete
+  */
+
+  r[revision] = true;
+
+  r.dates[revision] = today;
+
+
+  /*
+    Set next revision date
+  */
+
+  if (revision === "day1") {
+
+    r.dates.day3 =
+      addDays(today, 2);
+
+    r.dates.day7 =
+      addDays(today, 6);
+
+  }
+
+
+  if (revision === "day3") {
+
+    /*
+      Day 7 remains based on Day 1.
+      If Day 7 date doesn't exist,
+      create it.
+    */
+
+    if (!r.dates.day7) {
+
+      r.dates.day7 =
+        addDays(today, 4);
+
+    }
+
+  }
+
+
+  /*
+    XP
+  */
+
+  data.xp += 10;
+
+
+  /*
+    Streak
+  */
+
+  updateStreakAfterRevision();
+
+
+  /*
+    Save
+  */
+
+  saveData();
+
+
+  /*
+    Refresh UI
+  */
+
+  renderAll();
+
+
+  /*
+    Success message
+  */
+
+  alert(
+    "🎉 " +
+    chapter.name +
+    "\n\n" +
+    revisionLabel(revision) +
+    " Revision Complete!\n\n" +
+    "+10 XP ⭐"
+  );
+}
+
+
+/* =========================================================
+   REVISION LABEL
+========================================================= */
+
+function revisionLabel(revision) {
+
+  if (revision === "day1") {
+    return "Day 1";
+  }
+
+  if (revision === "day3") {
+    return "Day 3";
+  }
+
+  if (revision === "day7") {
+    return "Day 7";
+  }
+
+  return revision;
+}
+
+
+/* =========================================================
+   SUBJECT PROGRESS
+========================================================= */
+
+function getSubjectProgress(subjectId) {
+
+  const subject =
+    getSubject(subjectId);
+
+  if (
+    !subject ||
+    subject.chapters.length === 0
+  ) {
+
+    return 0;
+  }
+
+
+  let total = 0;
+
+  let completed = 0;
+
+
+  subject.chapters.forEach(
+    chapter => {
+
+      total += 3;
+
+
+      const r =
+        getRevision(
+          subject.id,
+          chapter.id
+        );
+
+
+      if (r.day1) {
+        completed++;
+      }
+
+      if (r.day3) {
+        completed++;
+      }
+
+      if (r.day7) {
+        completed++;
+      }
+
+    }
+  );
+
+
+  if (total === 0) {
+    return 0;
+  }
+
+
+  return Math.round(
+    (completed / total) * 100
+  );
+}
+
+
+/* =========================================================
+   OVERALL PROGRESS
+========================================================= */
+
+function getOverallProgress() {
+
+  let total = 0;
+
+  let completed = 0;
+
+
+  data.subjects.forEach(
+    subject => {
+
+      subject.chapters.forEach(
+        chapter => {
+
+          total += 3;
+
+
+          const r =
+            getRevision(
+              subject.id,
+              chapter.id
+            );
+
+
+          if (r.day1) {
+            completed++;
+          }
+
+          if (r.day3) {
+            completed++;
+          }
+
+          if (r.day7) {
+            completed++;
+          }
+
+        }
+      );
+
+    }
+  );
+
+
+  if (total === 0) {
+    return 0;
+  }
+
+
+  return Math.round(
+    (completed / total) * 100
+  );
+}
+
+
+/* =========================================================
+   UPDATE OVERALL PROGRESS
+========================================================= */
+
+function updateOverallProgress() {
+
+  const percent =
+    getOverallProgress();
+
+
+  const element =
+    document.getElementById(
+      "overallProgress"
+    );
+
+
+  if (element) {
+
+    element.textContent =
+      percent + "%";
+
+  }
+}
+
+
+/* =========================================================
+   TODAY'S REVISION
+========================================================= */
+
+function getTodayRevisions() {
+
+  const result = [];
+
+  const today =
+    getToday();
+
+
+  data.subjects.forEach(
+    subject => {
+
+      subject.chapters.forEach(
+        chapter => {
+
+          const r =
+            getRevision(
+              subject.id,
+              chapter.id
+            );
+
+
+          /*
+            Day 1:
+            It is immediately available
+            only if not completed.
+          */
+
+          if (
+            !r.day1
+          ) {
+
+            result.push({
+
+              subjectId: subject.id,
+
+              subjectName: subject.name,
+
+              subjectIcon: subject.icon,
+
+              chapterId: chapter.id,
+
+              chapterName: chapter.name,
+
+              revision: "day1"
+
+            });
+
+            return;
+          }
+
+
+          /*
+            Day 3
+          */
+
+          if (
+            r.day1 &&
+            !r.day3 &&
+            r.dates.day3 &&
+            r.dates.day3 <= today
+          ) {
+
+            result.push({
+
+              subjectId: subject.id,
+
+              subjectName: subject.name,
+
+              subjectIcon: subject.icon,
+
+              chapterId: chapter.id,
+
+              chapterName: chapter.name,
+
+              revision: "day3"
+
+            });
+
+            return;
+          }
+
+
+          /*
+            Day 7
+          */
+
+          if (
+            r.day3 &&
+            !r.day7 &&
+            r.dates.day7 &&
+            r.dates.day7 <= today
+          ) {
+
+            result.push({
+
+              subjectId: subject.id,
+
+              subjectName: subject.name,
+
+              subjectIcon: subject.icon,
+
+              chapterId: chapter.id,
+
+              chapterName: chapter.name,
+
+              revision: "day7"
+
+            });
+
+          }
+
+        }
+      );
+
+    }
+  );
+
+
+  return result;
+}
+
+
+/* =========================================================
+   RENDER TODAY
+========================================================= */
 
 function renderToday() {
 
   const list =
-    $("todayList");
+    document.getElementById(
+      "todayList"
+    );
+
 
   if (!list) {
     return;
   }
 
+
   list.innerHTML = "";
 
-  const due =
-    getDueRevisions();
 
-  const countElement =
-    $("todayCount");
+  const revisions =
+    getTodayRevisions();
 
-  if (countElement) {
 
-    countElement.textContent =
-      due.length +
-      " revisions today";
-  }
-
-  if (due.length === 0) {
+  if (revisions.length === 0) {
 
     list.innerHTML = `
-      <div class="empty-state">
 
-        <h3>🎉 No Revision Due Today!</h3>
+      <div class="empty-today">
+
+        <h2>🎉 All caught up!</h2>
 
         <p>
-          आजची सर्व revision पूर्ण झाली आहेत
-          किंवा अजून revision due नाही.
+          आजची कोणतीही revision बाकी नाही.
         </p>
 
       </div>
+
     `;
 
     return;
   }
 
-  due.forEach(item => {
 
-    const card =
-      document.createElement("div");
+  revisions.forEach(
+    item => {
 
-    card.className =
-      "today-card";
+      const card =
+        document.createElement("div");
 
-    card.innerHTML = `
 
-      <h3>
-        ${escapeHTML(item.subjectIcon)}
-        ${escapeHTML(item.subjectName)}
-      </h3>
+      card.className =
+        "today-card";
 
-      <p>
-        ${escapeHTML(item.chapterName)}
-      </p>
 
-      <strong>
-        📅 Day ${item.day}
-      </strong>
+      card.innerHTML = `
 
-      <button
-        class="today-btn"
-        onclick="
-          completeRevision(
-            '${item.subjectId}',
-            '${item.chapterId}',
-            ${item.day}
-          )
-        "
-      >
-        ✅ Complete Revision
-      </button>
+        <h3>
+          ${item.subjectIcon}
+          ${escapeHTML(item.subjectName)}
+        </h3>
 
-    `;
+        <p>
+          ${escapeHTML(item.chapterName)}
+        </p>
 
-    list.appendChild(card);
-  });
+        <div class="today-revision-label">
+          🔄 ${revisionLabel(item.revision)}
+        </div>
+
+        <button
+          type="button"
+          class="today-btn">
+          Complete Revision
+        </button>
+
+      `;
+
+
+      card
+        .querySelector(".today-btn")
+        .addEventListener(
+          "click",
+          function () {
+
+            completeRevision(
+              item.subjectId,
+              item.chapterId,
+              item.revision
+            );
+
+          }
+        );
+
+
+      list.appendChild(card);
+
+    }
+  );
+}
+
+
+/* =========================================================
+   TODAY COUNT
+========================================================= */
+
+function updateTodayCount() {
+
+  const element =
+    document.getElementById(
+      "todayCount"
+    );
+
+
+  if (!element) {
+    return;
+  }
+
+
+  const count =
+    getTodayRevisions().length;
+
+
+  element.textContent =
+    count === 1
+      ? "1 revision today"
+      : count + " revisions today";
 }
 
 
 /* =========================================================
    PROGRESS PAGE
-   ========================================================= */
+========================================================= */
 
 function renderProgress() {
 
-  const overall =
-    getOverallProgress();
-
-  const overallElements = [
-    $("progressPercent"),
-    $("overallProgress"),
-    $("progressPagePercent")
-  ];
-
-  overallElements.forEach(element => {
-
-    if (element) {
-      element.textContent =
-        overall + "%";
-    }
-  });
-
   const list =
-    $("progressList");
+    document.getElementById(
+      "progressList"
+    );
+
 
   if (!list) {
     return;
   }
 
+
   list.innerHTML = "";
 
-  data.subjects.forEach(subject => {
 
-    const percent =
-      getSubjectProgress(
-        subject.id
-      );
+  data.subjects.forEach(
+    subject => {
 
-    const card =
-      document.createElement("div");
+      const percent =
+        getSubjectProgress(
+          subject.id
+        );
 
-    card.className =
-      "progress-subject-card";
 
-    card.innerHTML = `
+      const card =
+        document.createElement("div");
 
-      <div class="progress-subject-top">
 
-        <strong>
-          ${escapeHTML(subject.icon)}
-          ${escapeHTML(subject.name)}
-        </strong>
+      card.className =
+        "progress-card";
 
-        <strong>
-          ${percent}%
-        </strong>
 
-      </div>
+      card.innerHTML = `
 
-      <div class="progress-bar">
+        <div class="progress-info">
 
-        <div
-          class="progress-fill"
-          style="width:${percent}%"
-        ></div>
+          <strong>
+            ${subject.icon}
+            ${escapeHTML(subject.name)}
+          </strong>
 
-      </div>
+          <span>
+            ${percent}%
+          </span>
 
-      <p>
-        ${subject.chapters.length}
-        chapters
-      </p>
+        </div>
 
-    `;
+        <div class="large-progress">
 
-    list.appendChild(card);
+          <div
+            style="width:${percent}%">
+          </div>
 
-    renderChapterProgress(
-      subject,
-      card
-    );
-  });
+        </div>
+
+        <p>
+          ${subject.chapters.length}
+          chapters
+        </p>
+
+      `;
+
+
+      list.appendChild(card);
+
+    }
+  );
 }
 
 
 /* =========================================================
-   CHAPTER PROGRESS
-   ========================================================= */
+   XP
+========================================================= */
 
-function renderChapterProgress(
-  subject,
-  parent
-) {
+function updateXP() {
 
-  if (!subject.chapters.length) {
+  const xp =
+    data.xp;
+
+
+  const text =
+    document.getElementById(
+      "xpText"
+    );
+
+
+  if (text) {
+
+    text.textContent =
+      xp + " XP";
+
+  }
+
+
+  const bar =
+    document.getElementById(
+      "xpBar"
+    );
+
+
+  if (bar) {
+
+    /*
+      Every 100 XP = full bar.
+    */
+
+    const percentage =
+      xp % 100;
+
+
+    bar.style.width =
+      percentage + "%";
+
+  }
+
+
+  renderBadges();
+}
+
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+function renderBadges() {
+
+  const container =
+    document.getElementById(
+      "badges"
+    );
+
+
+  if (!container) {
     return;
   }
 
-  const container =
-    document.createElement("div");
 
-  container.className =
-    "chapter-progress-list";
+  container.innerHTML = "";
 
-  subject.chapters.forEach(
-    (chapter, index) => {
 
-      const percent =
-        getChapterPercent(
-          subject.id,
-          chapter.id
-        );
+  const xp =
+    data.xp;
 
-      const row =
-        document.createElement("div");
 
-      row.className =
-        "chapter-progress-row";
+  const badges = [];
 
-      row.innerHTML = `
 
-        <span>
-          ${index + 1}.
-          ${escapeHTML(chapter.name)}
-        </span>
+  if (xp >= 10) {
 
-        <span>
-          ${percent}%
-        </span>
+    badges.push(
+      "🌱 First Revision"
+    );
 
-      `;
+  }
 
-      container.appendChild(row);
+
+  if (xp >= 50) {
+
+    badges.push(
+      "🔥 Getting Started"
+    );
+
+  }
+
+
+  if (xp >= 100) {
+
+    badges.push(
+      "⭐ 100 XP"
+    );
+
+  }
+
+
+  if (xp >= 250) {
+
+    badges.push(
+      "🏆 Revision Pro"
+    );
+
+  }
+
+
+  if (xp >= 500) {
+
+    badges.push(
+      "👑 Memory Master"
+    );
+
+  }
+
+
+  if (data.streak >= 3) {
+
+    badges.push(
+      "🔥 3 Day Streak"
+    );
+
+  }
+
+
+  if (data.streak >= 7) {
+
+    badges.push(
+      "💎 7 Day Streak"
+    );
+
+  }
+
+
+  if (badges.length === 0) {
+
+    container.innerHTML =
+      "<span>Complete revisions to unlock badges 🏅</span>";
+
+    return;
+  }
+
+
+  badges.forEach(
+    badge => {
+
+      const element =
+        document.createElement("span");
+
+
+      element.className =
+        "badge";
+
+
+      element.textContent =
+        badge;
+
+
+      container.appendChild(
+        element
+      );
+
     }
   );
+}
 
-  parent.appendChild(container);
+
+/* =========================================================
+   STREAK
+========================================================= */
+
+function updateStreakAfterRevision() {
+
+  const today =
+    getToday();
+
+
+  if (
+    !data.completedDates.includes(today)
+  ) {
+
+    data.completedDates.push(today);
+
+  }
+
+
+  data.completedDates.sort();
+
+
+  const yesterday =
+    addDays(today, -1);
+
+
+  if (
+    data.lastRevisionDate === yesterday
+  ) {
+
+    data.streak++;
+
+  }
+  else if (
+    data.lastRevisionDate !== today
+  ) {
+
+    data.streak = 1;
+
+  }
+
+
+  data.lastRevisionDate =
+    today;
+}
+
+
+/* =========================================================
+   DISPLAY STREAK
+========================================================= */
+
+function updateStreak() {
+
+  const element =
+    document.getElementById(
+      "streakCount"
+    );
+
+
+  if (element) {
+
+    element.textContent =
+      data.streak || 0;
+
+  }
 }
 
 
 /* =========================================================
    COUNTDOWN
-   ========================================================= */
+========================================================= */
 
-function renderCountdown() {
-
-  const daysElement =
-    $("countdownDays");
-
-  const hoursElement =
-    $("countdownHours");
-
-  const minutesElement =
-    $("countdownMinutes");
-
-  if (
-    !daysElement &&
-    !hoursElement &&
-    !minutesElement
-  ) {
-    return;
-  }
+function updateCountdown() {
 
   const examDate =
-    data.settings.examDate;
+    new Date(CONFIG.examDate);
 
-  if (!examDate) {
 
-    if (daysElement) {
-      daysElement.textContent = "--";
-    }
+  const now =
+    new Date();
 
-    if (hoursElement) {
-      hoursElement.textContent = "--";
-    }
 
-    if (minutesElement) {
-      minutesElement.textContent = "--";
-    }
+  const difference =
+    examDate.getTime() -
+    now.getTime();
+
+
+  const days =
+    document.getElementById(
+      "daysLeft"
+    );
+
+
+  const hours =
+    document.getElementById(
+      "hoursLeft"
+    );
+
+
+  const minutes =
+    document.getElementById(
+      "minutesLeft"
+    );
+
+
+  if (
+    !days ||
+    !hours ||
+    !minutes
+  ) {
 
     return;
   }
 
-  const target =
-    new Date(
-      examDate + "T00:00:00"
-    ).getTime();
 
-  const now =
-    Date.now();
+  if (difference <= 0) {
 
-  let difference =
-    target - now;
+    days.textContent = "0";
 
-  if (difference < 0) {
-    difference = 0;
+    hours.textContent = "0";
+
+    minutes.textContent = "0";
+
+    return;
   }
+
 
   const totalMinutes =
     Math.floor(
       difference / 60000
     );
 
-  const days =
+
+  const d =
     Math.floor(
       totalMinutes / 1440
     );
 
-  const hours =
+
+  const h =
     Math.floor(
       (totalMinutes % 1440) / 60
     );
 
-  const minutes =
+
+  const m =
     totalMinutes % 60;
 
-  if (daysElement) {
-    daysElement.textContent =
-      days;
-  }
 
-  if (hoursElement) {
-    hoursElement.textContent =
-      hours;
-  }
+  days.textContent = d;
 
-  if (minutesElement) {
-    minutesElement.textContent =
-      minutes;
-  }
+  hours.textContent = h;
+
+  minutes.textContent = m;
 }
 
 
 /* =========================================================
-   SET EXAM DATE
-   ========================================================= */
+   ESCAPE HTML
+========================================================= */
 
-function setExamDate() {
+function escapeHTML(value) {
 
-  const date =
-    prompt(
-      "HSC Exam Date टाका.\n\n" +
-      "Format: YYYY-MM-DD"
+  return String(value)
+
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+
+    .replace(
+      /</g,
+      "&lt;"
+    )
+
+    .replace(
+      />/g,
+      "&gt;"
+    )
+
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+
+    .replace(
+      /'/g,
+      "&#039;"
     );
-
-  if (date === null) {
-    return;
-  }
-
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-
-    alert(
-      "⚠️ Date format चुकीचा आहे."
-    );
-
-    return;
-  }
-
-  data.settings.examDate =
-    date;
-
-  saveData();
-
-  renderCountdown();
 }
 
 
 /* =========================================================
-   BADGES
-   ========================================================= */
+   RENDER EVERYTHING
+========================================================= */
 
-function renderBadges() {
-
-  const container =
-    $("badges");
-
-  if (!container) {
-    return;
-  }
-
-  const badges =
-    getBadges();
-
-  container.innerHTML = "";
-
-  if (badges.length === 0) {
-
-    container.innerHTML = `
-      <p>
-        Complete revisions to unlock badges 🏆
-      </p>
-    `;
-
-    return;
-  }
-
-  badges.forEach(badge => {
-
-    const item =
-      document.createElement("div");
-
-    item.className =
-      "badge";
-
-    item.textContent =
-      badge;
-
-    container.appendChild(item);
-  });
-}
-
-
-/* =========================================================
-   GLOBAL REFRESH
-   ========================================================= */
-
-function refreshApp() {
+function renderAll() {
 
   renderHome();
-  renderSubject();
+
   renderToday();
+
   renderProgress();
-  renderCountdown();
-  renderBadges();
+
+
+  if (currentSubjectId) {
+
+    renderSubject();
+
+  }
 }
 
 
 /* =========================================================
-   RESET ALL DATA
-   ========================================================= */
-
-function resetAllData() {
-
-  const confirmed =
-    confirm(
-      "⚠️ WARNING\n\n" +
-      "सगळे chapters, revisions, XP आणि streak delete होतील.\n\n" +
-      "हा action undo करता येणार नाही.\n\n" +
-      "Continue?"
-    );
-
-  if (!confirmed) {
-    return;
-  }
-
-  localStorage.removeItem(
-    STORAGE_KEY
-  );
-
-  data =
-    createDefaultData();
-
-  selectedSubjectId = null;
-
-  alert(
-    "✅ App data reset झाले."
-  );
-
-  location.reload();
-}
-
-
-/* =========================================================
-   ADD SUBJECT
-   ========================================================= */
-
-function addSubject() {
-
-  const name =
-    prompt(
-      "नवीन Subject चे नाव:"
-    );
-
-  if (name === null) {
-    return;
-  }
-
-  const cleanName =
-    name.trim();
-
-  if (!cleanName) {
-    return;
-  }
-
-  const exists =
-    data.subjects.some(
-      subject =>
-        subject.name.toLowerCase() ===
-        cleanName.toLowerCase()
-    );
-
-  if (exists) {
-
-    alert(
-      "⚠️ हा subject आधीच आहे."
-    );
-
-    return;
-  }
-
-  data.subjects.push({
-    id: createId("subject"),
-    name: cleanName,
-    icon: "📚",
-    chapters: []
-  });
-
-  saveData();
-
-  renderHome();
-}
-
-
-/* =========================================================
-   DELETE SUBJECT
-   ========================================================= */
-
-function deleteSubject(subjectId) {
-
-  const subject =
-    getSubjectById(subjectId);
-
-  if (!subject) {
-    return;
-  }
-
-  const confirmed =
-    confirm(
-      "⚠️ " +
-      subject.name +
-      "\n\n" +
-      "हा पूर्ण subject आणि त्याचे chapters delete करायचे आहेत का?"
-    );
-
-  if (!confirmed) {
-    return;
-  }
-
-  subject.chapters.forEach(
-    chapter => {
-
-      delete data.revisions[
-        getRevisionKey(
-          subject.id,
-          chapter.id
-        )
-      ];
-    }
-  );
-
-  data.subjects =
-    data.subjects.filter(
-      item => item.id !== subjectId
-    );
-
-  if (
-    selectedSubjectId === subjectId
-  ) {
-    selectedSubjectId = null;
-  }
-
-  saveData();
-
-  renderHome();
-}
-
-
-/* =========================================================
-   INITIALIZATION
-   ========================================================= */
+   INITIALIZE
+========================================================= */
 
 function initializeApp() {
 
-  console.log(
-    "Revision Rules " +
-    APP_VERSION +
-    " loaded successfully."
+  /*
+    Make sure all subjects exist.
+  */
+
+  DEFAULT_SUBJECTS.forEach(
+    defaultSubject => {
+
+      const exists =
+        data.subjects.some(
+          subject =>
+            subject.id ===
+            defaultSubject.id
+        );
+
+
+      if (!exists) {
+
+        data.subjects.push(
+          JSON.parse(
+            JSON.stringify(
+              defaultSubject
+            )
+          )
+        );
+
+      }
+
+    }
   );
 
-  if (
-    data.subjects.length &&
-    !selectedSubjectId
-  ) {
 
-    selectedSubjectId =
-      data.subjects[0].id;
-  }
+  saveData();
 
-  renderHome();
-  renderToday();
-  renderProgress();
-  renderCountdown();
-  renderBadges();
+
+  renderAll();
+
+
+  /*
+    Update countdown every minute.
+  */
+
+  updateCountdown();
+
 
   setInterval(
-    renderCountdown,
+    updateCountdown,
+    60000
+  );
+
+
+  /*
+    Keep today's count fresh.
+  */
+
+  setInterval(
+    updateTodayCount,
     60000
   );
 }
 
 
 /* =========================================================
-   SAFE START
-   ========================================================= */
+   GLOBAL FUNCTIONS
+   ---------------------------------------------------------
+   Important because index.html uses onclick=""
+========================================================= */
+
+window.showPage =
+  showPage;
+
+window.goHome =
+  goHome;
+
+window.openSubject =
+  openSubject;
+
+window.openSubjectByName =
+  openSubjectByName;
+
+window.completeRevision =
+  completeRevision;
+
+window.addChapter =
+  addChapter;
+
+window.editChapter =
+  editChapter;
+
+window.deleteChapter =
+  deleteChapter;
+
+window.moveChapter =
+  moveChapter;
+
+
+/* =========================================================
+   START APP
+========================================================= */
 
 if (
-  document.readyState === "loading"
+  document.readyState ===
+  "loading"
 ) {
 
   document.addEventListener(
@@ -1633,69 +2454,9 @@ if (
     initializeApp
   );
 
-} else {
+}
+else {
 
   initializeApp();
+
 }
-
-
-/* =========================================================
-   GLOBAL FUNCTIONS
-   Required because index.html uses onclick=""
-   ========================================================= */
-
-window.showPage =
-  showPage;
-
-window.openSubject =
-  openSubject;
-
-window.startRevision =
-  startRevision;
-
-window.completeRevision =
-  completeRevision;
-
-window.renderSubject =
-  renderSubject;
-
-window.renderToday =
-  renderToday;
-
-window.renderProgress =
-  renderProgress;
-
-window.manageChapters =
-  manageChapters;
-
-window.addChapter =
-  addChapter;
-
-window.renameChapter =
-  renameChapter;
-
-window.deleteChapter =
-  deleteChapter;
-
-window.moveChapterUp =
-  moveChapterUp;
-
-window.moveChapterDown =
-  moveChapterDown;
-
-window.setExamDate =
-  setExamDate;
-
-window.addSubject =
-  addSubject;
-
-window.deleteSubject =
-  deleteSubject;
-
-window.resetAllData =
-  resetAllData;
-
-
-/* =========================================================
-   END
-   ========================================================= */
