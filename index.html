@@ -1,1 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
 
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
+  <title>Revision Rules</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ================= HEADER ================= -->
+
+  <header class="top-header">
+
+    <div>
+      <h1>Revision Rules</h1>
+      <p>HSC Smart Revision Tracker</p>
+    </div>
+
+    <div class="streak-box">
+      🔥 <span id="streakValue">0</span>
+    </div>
+
+  </header>
+
+
+  <!-- ================= APP ================= -->
+
+  <main id="app">
+
+    <!-- ================= HOME PAGE ================= -->
+
+    <section
+      id="homePage"
+      class="page active"
+    >
+
+      <div class="hero-card">
+
+        <div class="hero-text">
+
+          <span class="small-title">
+            YOUR STUDY PROGRESS
+          </span>
+
+          <h2>Keep going! 🚀</h2>
+
+          <p>
+            Small revisions every day create
+            strong memory.
+          </p>
+
+        </div>
+
+        <div class="circle-progress">
+
+          <span id="overallPercent">
+            0%
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- TODAY -->
+
+      <div class="section-title">
+
+        <h2>📚 Subjects</h2>
+
+        <span id="todayCount">
+          0 revisions today
+        </span>
+
+      </div>
+
+      <div id="homeSubjects" class="subject-list"></div>
+
+
+      <!-- TODAY REVISION -->
+
+      <div class="white-card">
+
+        <div class="card-heading">
+
+          <h2>📝 Today's Revision</h2>
+
+        </div>
+
+        <div id="todayList" class="today-list">
+
+          <div class="empty-message">
+            No revisions due today 🎉
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- EXAM COUNTDOWN -->
+
+      <div class="white-card">
+
+        <div class="card-heading">
+
+          <h2>🎯 HSC Exam Countdown</h2>
+
+          <button
+            id="setExamBtn"
+            class="small-btn"
+          >
+            Set Date
+          </button>
+
+        </div>
+
+        <div class="countdown">
+
+          <div>
+            <strong id="countDays">--</strong>
+            <span>Days</span>
+          </div>
+
+          <div>
+            <strong id="countHours">--</strong>
+            <span>Hours</span>
+          </div>
+
+          <div>
+            <strong id="countMinutes">--</strong>
+            <span>Minutes</span>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- XP -->
+
+      <div class="white-card">
+
+        <div class="card-heading">
+
+          <h2>⭐ XP & Badges</h2>
+
+          <strong>
+            <span id="xpValue">0</span> XP
+          </strong>
+
+        </div>
+
+        <div class="xp-bar">
+
+          <div
+            id="xpBar"
+            class="xp-fill"
+          ></div>
+
+        </div>
+
+        <div id="badges" class="badges"></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= REVISION PAGE ================= -->
+
+    <section
+      id="revisionPage"
+      class="page"
+    >
+
+      <div class="page-title">
+
+        <div>
+          <h2>🔄 Revision</h2>
+          <p>Manage your subjects and chapters</p>
+        </div>
+
+        <button
+          id="addSubjectBtn"
+          class="primary-btn"
+        >
+          + Subject
+        </button>
+
+      </div>
+
+
+      <div id="revisionSubjects"></div>
+
+    </section>
+
+
+    <!-- ================= PROGRESS PAGE ================= -->
+
+    <section
+      id="progressPage"
+      class="page"
+    >
+
+      <div class="page-title">
+
+        <div>
+          <h2>📊 Progress</h2>
+          <p>Your complete revision progress</p>
+        </div>
+
+      </div>
+
+
+      <div class="white-card overall-card">
+
+        <h2>Overall Progress</h2>
+
+        <div class="big-progress">
+
+          <div
+            id="progressCircle"
+            class="progress-circle"
+          >
+
+            <span id="progressPercent">
+              0%
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div id="progressSubjects"></div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ================= BOTTOM NAV ================= -->
+
+  <nav class="bottom-nav">
+
+    <button
+      class="nav-btn active"
+      data-page="homePage"
+    >
+
+      <span>🏠</span>
+      <small>Home</small>
+
+    </button>
+
+
+    <button
+      class="nav-btn"
+      data-page="revisionPage"
+    >
+
+      <span>🔄</span>
+      <small>Revision</small>
+
+    </button>
+
+
+    <button
+      class="nav-btn"
+      data-page="progressPage"
+    >
+
+      <span>📊</span>
+      <small>Progress</small>
+
+    </button>
+
+  </nav>
+
+
+  <!-- ================= MODAL ================= -->
+
+  <div
+    id="modal"
+    class="modal hidden"
+  >
+
+    <div class="modal-box">
+
+      <button
+        id="closeModal"
+        class="close-modal"
+      >
+        ×
+      </button>
+
+      <div id="modalContent"></div>
+
+    </div>
+
+  </div>
+
+
+  <script src="script.js"></script>
+
+</body>
+</html>
