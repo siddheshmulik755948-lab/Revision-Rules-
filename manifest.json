@@ -1,18 +1,1 @@
-{
-  "name": "Revision Rules",
-  "short_name": "Revision Rules",
-  "description": "HSC Smart Revision Tracker",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#f8f9ff",
-  "theme_color": "#6266e8",
-  "orientation": "portrait",
-  "icons": [
-    {
-      "src": "icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
-}
+
