@@ -1,1 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <meta name="theme-color" content="#eef8f2">
+  <meta name="description" content="Revision Tracker - Your personal study revision planner">
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <link rel="stylesheet" href="style.css">
+
+  <title>Revision Tracker</title>
+</head>
+
+<body>
+
+  <div id="app">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="brand">
+        <img src="icon.png" alt="Revision Tracker" class="app-icon">
+        <div>
+          <h1>Revision Tracker</h1>
+          <p>Study smart • Remember more</p>
+        </div>
+      </div>
+
+      <button id="themeBtn" class="icon-button" aria-label="Change theme">
+        ☀
+      </button>
+    </header>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- HOME -->
+      <section id="homePage" class="page active">
+
+        <div class="hero">
+          <div>
+            <span class="label">YOUR STUDY SPACE</span>
+            <h2 id="greeting">Good Evening 👋</h2>
+            <p>Small revisions every day create strong memory.</p>
+          </div>
+
+          <div class="progress-circle">
+            <span id="overallProgress">0%</span>
+          </div>
+        </div>
+
+
+        <!-- STATISTICS -->
+        <div class="stats-grid">
+
+          <div class="stat-card">
+            <span>Today</span>
+            <strong id="todayCountHome">0</strong>
+            <small>revisions</small>
+          </div>
+
+          <div class="stat-card">
+            <span>Incomplete</span>
+            <strong id="overdueCountHome">0</strong>
+            <small>revisions</small>
+          </div>
+
+          <div class="stat-card">
+            <span>Streak</span>
+            <strong id="streakHome">0</strong>
+            <small>days</small>
+          </div>
+
+          <div class="stat-card">
+            <span>XP</span>
+            <strong id="xpHome">0</strong>
+            <small>points</small>
+          </div>
+
+        </div>
+
+
+        <!-- TODAY PREVIEW -->
+        <div class="card">
+
+          <div class="section-title">
+            <div>
+              <span class="label">ACTION</span>
+              <h3>Today's Revision</h3>
+            </div>
+
+            <button class="text-button" data-page="todayPage">
+              See all
+            </button>
+          </div>
+
+          <div id="homeTodayList"></div>
+
+        </div>
+
+
+        <!-- SUBJECT PROGRESS -->
+        <div class="card">
+
+          <div class="section-title">
+            <div>
+              <span class="label">YOUR SUBJECTS</span>
+              <h3>Subject Progress</h3>
+            </div>
+
+            <button id="homeAddSubject" class="primary-button small-button">
+              + Subject
+            </button>
+          </div>
+
+          <div id="homeSubjects"></div>
+
+        </div>
+
+
+        <!-- EXAM COUNTDOWN -->
+        <div class="card">
+
+          <div class="section-title">
+            <div>
+              <span class="label">COUNTDOWN</span>
+              <h3>HSC Exam</h3>
+            </div>
+
+            <button id="examEditBtn" class="text-button">
+              Set date
+            </button>
+          </div>
+
+          <div id="examCountdown">
+            No exam date set
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- TODAY PAGE -->
+      <section id="todayPage" class="page">
+
+        <div class="page-heading">
+          <span class="label">ACTION</span>
+          <h2>Today's Revision</h2>
+          <p id="todayDate"></p>
+        </div>
+
+
+        <div class="card">
+
+          <div class="section-title">
+            <h3>Due Today</h3>
+            <span id="todayCount" class="pill">0</span>
+          </div>
+
+          <div id="todayList"></div>
+
+        </div>
+
+
+        <!-- INCOMPLETE REVISION -->
+        <div class="card">
+
+          <div class="section-title">
+            <div>
+              <span class="label">CATCH UP</span>
+              <h3>Incomplete Revision</h3>
+            </div>
+
+            <span id="overdueCount" class="pill danger-pill">
+              0
+            </span>
+          </div>
+
+          <p class="muted">
+            येथे राहिलेल्या revisions, त्यांची original date आणि किती दिवस उशीर झाला आहे ते दिसेल.
+          </p>
+
+          <div id="overdueList"></div>
+
+        </div>
+
+      </section>
+
+
+      <!-- SUBJECTS -->
+      <section id="subjectsPage" class="page">
+
+        <div class="page-heading row-heading">
+
+          <div>
+            <span class="label">ORGANIZE</span>
+            <h2>Subjects</h2>
+            <p>Subjects आणि chapters manage करा.</p>
+          </div>
+
+          <button id="addSubjectBtn" class="primary-button">
+            + Subject
+          </button>
+
+        </div>
+
+        <div id="subjectsList"></div>
+
+      </section>
+
+
+      <!-- DATE PLANNER -->
+      <section id="plannerPage" class="page">
+
+        <div class="page-heading">
+
+          <span class="label">PLAN AHEAD</span>
+
+          <h2>Date Planner</h2>
+
+          <p>
+            एक date किंवा पूर्ण trip range निवडा आणि त्या काळातील revisions पहा.
+          </p>
+
+        </div>
+
+
+        <div class="card">
+
+          <div class="date-grid">
+
+            <label>
+              From
+              <input type="date" id="plannerFrom">
+            </label>
+
+            <label>
+              To
+              <input type="date" id="plannerTo">
+            </label>
+
+          </div>
+
+          <button id="plannerBtn" class="primary-button full-button">
+            Show Revisions
+          </button>
+
+        </div>
+
+
+        <div id="plannerSummary"></div>
+
+        <div id="plannerResults"></div>
+
+      </section>
+
+
+      <!-- PROGRESS -->
+      <section id="progressPage" class="page">
+
+        <div class="page-heading">
+
+          <span class="label">MEMORY MAP</span>
+
+          <h2>Progress</h2>
+
+          <p>
+            प्रत्येक chapter साठी स्वतंत्र 7-step revision tracker.
+          </p>
+
+        </div>
+
+        <div id="progressList"></div>
+
+      </section>
+
+
+      <!-- MORE -->
+      <section id="morePage" class="page">
+
+        <div class="page-heading">
+
+          <span class="label">CONTROL CENTER</span>
+
+          <h2>More</h2>
+
+        </div>
+
+
+        <div class="card settings-card">
+
+          <button id="backupBtn" class="setting-button">
+            <span>⬇️</span>
+            <div>
+              <strong>Backup Data</strong>
+              <small>तुमचा पूर्ण data save करा.</small>
+            </div>
+            <b>›</b>
+          </button>
+
+
+          <button id="restoreBtn" class="setting-button">
+            <span>⬆️</span>
+            <div>
+              <strong>Restore Data</strong>
+              <small>पूर्वीचा backup परत आणा.</small>
+            </div>
+            <b>›</b>
+          </button>
+
+
+          <button id="notifyBtn" class="setting-button">
+            <span>🔔</span>
+            <div>
+              <strong>Notifications</strong>
+              <small>Notification permission enable करा.</small>
+            </div>
+            <b>›</b>
+          </button>
+
+
+          <button id="resetBtn" class="setting-button danger">
+            <span>⚠️</span>
+            <div>
+              <strong>Reset All Data</strong>
+              <small>सर्व app data delete होईल.</small>
+            </div>
+            <b>›</b>
+          </button>
+
+        </div>
+
+
+        <div class="card">
+
+          <span class="label">REVISION RULE</span>
+
+          <h3>
+            Day 1 → 2 → 4 → 8 → 16 → 32 → 65
+          </h3>
+
+          <p class="muted">
+            Chapter add करताना Start Date save केली जाते आणि त्यावरून
+            revision dates automatically तयार होतात.
+          </p>
+
+        </div>
+
+        <input
+          type="file"
+          id="restoreFile"
+          accept=".json"
+          hidden
+        >
+
+      </section>
+
+    </main>
+
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+
+      <button class="nav-button active" data-page="homePage">
+        <span>⌂</span>
+        <small>Home</small>
+      </button>
+
+      <button class="nav-button" data-page="todayPage">
+        <span>✓</span>
+        <small>Today</small>
+      </button>
+
+      <button class="nav-button" data-page="subjectsPage">
+        <span>▦</span>
+        <small>Subjects</small>
+      </button>
+
+      <button class="nav-button" data-page="plannerPage">
+        <span>□</span>
+        <small>Planner</small>
+      </button>
+
+      <button class="nav-button" data-page="progressPage">
+        <span>◫</span>
+        <small>Progress</small>
+      </button>
+
+    </nav>
+
+  </div>
+
+
+  <!-- MODAL -->
+  <div id="modal" class="modal">
+
+    <div class="modal-background" data-close></div>
+
+    <div class="modal-box">
+
+      <button class="modal-close" data-close>
+        ×
+      </button>
+
+      <div id="modalContent"></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- TOAST -->
+  <div id="toast" class="toast"></div>
+
+
+  <script src="script.js" defer></script>
+
+</body>
+</html>
