@@ -1,1 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
 
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
+  <meta name="theme-color" content="#F7F5F0">
+  <meta name="description" content="Revision Tracker - Smart revision and study tracker">
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.png">
+
+  <title>Revision Tracker</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- APP HEADER -->
+  <header class="topbar">
+    <div class="brand">
+      <img src="icon.png" class="app-icon" alt="Revision Tracker">
+
+      <div>
+        <h1>Revision Tracker</h1>
+        <p>Study • Revise • Remember</p>
+      </div>
+    </div>
+
+    <button id="settingsBtn" class="icon-button" aria-label="Settings">
+      ⚙
+    </button>
+  </header>
+
+
+  <!-- MAIN NAVIGATION -->
+  <nav class="bottom-nav">
+
+    <button class="nav-btn active" data-page="homePage">
+      <span>⌂</span>
+      <small>Home</small>
+    </button>
+
+    <button class="nav-btn" data-page="todayPage">
+      <span>✓</span>
+      <small>Today</small>
+    </button>
+
+    <button class="nav-btn" data-page="incompletePage">
+      <span>!</span>
+      <small>Incomplete</small>
+    </button>
+
+    <button class="nav-btn" data-page="plannerPage">
+      <span>◷</span>
+      <small>Planner</small>
+    </button>
+
+  </nav>
+
+
+  <main class="app-container">
+
+
+    <!-- ================= HOME ================= -->
+
+    <section id="homePage" class="page active">
+
+      <div class="welcome-card">
+        <div>
+          <p class="eyebrow">WELCOME BACK</p>
+          <h2>Stay focused.<br>Keep moving forward.</h2>
+          <p id="todayText"></p>
+        </div>
+
+        <div class="progress-ring">
+          <span id="overallPercent">0%</span>
+        </div>
+      </div>
+
+
+      <!-- SUMMARY -->
+
+      <div class="stats-grid">
+
+        <div class="stat-card">
+          <span>📚</span>
+          <strong id="totalChapters">0</strong>
+          <small>Chapters</small>
+        </div>
+
+        <div class="stat-card">
+          <span>✓</span>
+          <strong id="completedRevisions">0</strong>
+          <small>Completed</small>
+        </div>
+
+        <div class="stat-card">
+          <span>⏰</span>
+          <strong id="pendingRevisions">0</strong>
+          <small>Pending</small>
+        </div>
+
+        <div class="stat-card">
+          <span>🔥</span>
+          <strong id="streakValue">0</strong>
+          <small>Day Streak</small>
+        </div>
+
+      </div>
+
+
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">YOUR SUBJECTS</p>
+          <h3>Study Dashboard</h3>
+        </div>
+      </div>
+
+      <div id="subjectsContainer" class="subjects-container"></div>
+
+    </section>
+
+
+    <!-- ================= TODAY ================= -->
+
+    <section id="todayPage" class="page">
+
+      <div class="page-heading">
+        <p class="eyebrow">TODAY</p>
+        <h2>Today's Revision</h2>
+        <p id="todayRevisionCount"></p>
+      </div>
+
+      <div id="todayRevisionList" class="revision-list"></div>
+
+      <div id="todayEmpty" class="empty-state hidden">
+        <div>✨</div>
+        <h3>All clear!</h3>
+        <p>No revision is scheduled for today.</p>
+      </div>
+
+    </section>
+
+
+    <!-- ================= INCOMPLETE ================= -->
+
+    <section id="incompletePage" class="page">
+
+      <div class="page-heading">
+        <p class="eyebrow">PENDING WORK</p>
+        <h2>Incomplete Revision</h2>
+        <p>See what you missed and how late it is.</p>
+      </div>
+
+      <div id="incompleteList" class="revision-list"></div>
+
+      <div id="incompleteEmpty" class="empty-state hidden">
+        <div>🎉</div>
+        <h3>Nothing pending</h3>
+        <p>You have completed all past revisions.</p>
+      </div>
+
+    </section>
+
+
+    <!-- ================= PLANNER ================= -->
+
+    <section id="plannerPage" class="page">
+
+      <div class="page-heading">
+        <p class="eyebrow">PLAN AHEAD</p>
+        <h2>Revision Planner</h2>
+        <p>Check revisions for any date or trip.</p>
+      </div>
+
+
+      <div class="planner-card">
+
+        <label for="plannerStart">Start Date</label>
+
+        <input
+          type="date"
+          id="plannerStart"
+        >
+
+        <label for="plannerEnd">End Date</label>
+
+        <input
+          type="date"
+          id="plannerEnd"
+        >
+
+        <button id="plannerBtn" class="primary-btn">
+          Show Revisions
+        </button>
+
+      </div>
+
+
+      <div id="plannerResults"></div>
+
+    </section>
+
+
+  </main>
+
+
+  <!-- ================= MODAL ================= -->
+
+  <div id="modalOverlay" class="modal-overlay hidden">
+
+    <div class="modal">
+
+      <button id="closeModal" class="modal-close">
+        ×
+      </button>
+
+      <div id="modalContent"></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ================= TOAST ================= -->
+
+  <div id="toast" class="toast"></div>
+
+
+  <script src="script.js"></script>
+
+</body>
+</html>
