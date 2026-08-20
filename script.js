@@ -1758,33 +1758,22 @@ function blobToURL(blob) {
    NOTES CARD
    ========================================================= */
 
-function renderNoteFile(file) {
+functifunction renderNoteFile(file) {
   const type = getFileType(file);
-
-  const safeName =
-    escapeHTML(file.name);
+  const safeName = escapeHTML(file.name);
 
   let preview = "";
 
   if (type === "image") {
+    const url = createFileURL(file.blob);
 
     preview = `
       <div class="media-box">
 
-        <div
-          style="
-            height:150px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            background:#f1f5f4;
-            overflow:hidden;">
-
-          <span style="font-size:45px">
-            🖼️
-          </span>
-
-        </div>
+        <img
+          src="${url}"
+          alt="${safeName}"
+          loading="lazy">
 
         <div class="media-info">
 
@@ -1813,6 +1802,117 @@ function renderNoteFile(file) {
   }
 
   else if (type === "video") {
+    const url = createFileURL(file.blob);
+
+    preview = `
+      <div class="media-box">
+
+        <video
+          controls
+          preload="metadata"
+          playsinline
+          src="${url}">
+        </video>
+
+        <div class="media-info">
+
+          <div class="muted">
+            ${safeName}
+          </div>
+
+          <button
+            class="btn small"
+            style="margin-top:7px"
+            onclick="viewStoredFile('${file.id}')">
+            Open
+          </button>
+
+          <button
+            class="btn small danger"
+            style="margin-top:7px"
+            onclick="deleteNoteFile('${file.id}')">
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+    `;
+  }
+
+  else if (type === "pdf") {
+    preview = `
+      <div class="media-box">
+
+        <div class="pdf-preview">
+          📄
+        </div>
+
+        <div class="media-info">
+
+          <div class="muted">
+            ${safeName}
+          </div>
+
+          <button
+            class="btn small"
+            style="margin-top:7px"
+            onclick="openPDFFile('${file.id}')">
+            Open PDF
+          </button>
+
+          <button
+            class="btn small danger"
+            style="margin-top:7px"
+            onclick="deleteNoteFile('${file.id}')">
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+    `;
+  }
+
+  else {
+    preview = `
+      <div class="media-box">
+
+        <div class="pdf-preview">
+          📎
+        </div>
+
+        <div class="media-info">
+
+          <div class="muted">
+            ${safeName}
+          </div>
+
+          <button
+            class="btn small"
+            style="margin-top:7px"
+            onclick="viewStoredFile('${file.id}')">
+            Open
+          </button>
+
+          <button
+            class="btn small danger"
+            style="margin-top:7px"
+            onclick="deleteNoteFile('${file.id}')">
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+    `;
+  }
+
+  return preview;
+}
+  
+
+  els
 
     preview = `
       <div class="media-box">
