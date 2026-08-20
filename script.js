@@ -2076,9 +2076,75 @@ async function storeNoteFile(chapterId, file) {
    VIEW STORED FILE
    ========================================================= */
 
+async function openPDFFile(fileId) {
+  try {
+    const file = await dbGet(
+      FILE_STORE,
+      fileId
+    );
+
+    if (!file) {
+      toast("PDF file not found.");
+      return;
+    }
+
+    if (!file.blob) {
+      toast("PDF data is unavailable.");
+      return;
+    }
+
+    const blob =
+      file.blob instanceof Blob
+        ? file.blob
+        : new Blob(
+            [file.blob],
+            {
+              type: "application/pdf"
+            }
+          );
+
+    const pdfBlob = new Blob(
+      [blob],
+      {
+        type: "application/pdf"
+      }
+    );
+
+    const url =
+      URL.createObjectURL(pdfBlob);
+
+    const link =
+      document.createElement("a");
+
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener";
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 60000);
+
+  } catch (error) {
+    console.error(
+      "PDF open error:",
+      error
+    );
+
+    toast(
+      "PDF open करता आले नाही."
+    );
+  }
+}
+
+
 async function viewStoredFile(fileId) {
   try {
-
     const file =
       await dbGet(
         FILE_STORE,
@@ -2091,35 +2157,29 @@ async function viewStoredFile(fileId) {
     }
 
     if (!file.blob) {
-      toast("Stored file is unavailable.");
+      toast(
+        "Stored file is unavailable."
+      );
       return;
     }
 
     const type =
       getFileType(file);
 
-    /*
-      IMPORTANT:
-      We create a fresh Blob.
-      This fixes cases where IndexedDB
-      returns a Blob with an unreliable
-      MIME type.
-    */
-
-    const blob =
-      new Blob(
-        [file.blob],
-        {
-          type:
-            type === "pdf"
-              ? "application/pdf"
-              : file.type ||
-                "application/octet-stream"
-        }
-      );
+    if (type === "pdf") {
+      await openPDFFile(fileId);
+      return;
+    }
 
     const url =
-      URL.createObjectURL(blob);
+      createFileURL(file.blob);
+
+    if (!url) {
+      toast(
+        "Unable to open file."
+      );
+      return;
+    }
 
     showFileViewer(
       file,
@@ -2128,7 +2188,6 @@ async function viewStoredFile(fileId) {
     );
 
   } catch (error) {
-
     console.error(
       "Open file error:",
       error
@@ -2139,7 +2198,6 @@ async function viewStoredFile(fileId) {
     );
   }
 }
-
 /* =========================================================
    FILE VIEWER
    ========================================================= */
