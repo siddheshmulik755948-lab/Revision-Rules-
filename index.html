@@ -2,124 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1,viewport-fit=cover"
-  >
-
-  <meta
-    name="theme-color"
-    content="#0f766e"
-  >
-
-  <meta
-    name="description"
-    content="Revision Tracker - Smart offline study and revision tracker"
-  >
-
-  <link
-    rel="manifest"
-    href="./manifest.json"
-  >
-
-  <link
-    rel="stylesheet"
-    href="./style.css?v=6"
-  >
-
-  <link
-    rel="icon"
-    href="./icon.png"
-  >
-
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="description" content="Revision Tracker - Smart offline study and revision tracker">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="icon.png">
   <title>Revision Tracker</title>
 </head>
 
 <body>
-
 <div id="app">
 
   <header class="topbar">
-
     <div>
-
-      <div class="brand">
-        Revision Tracker
-      </div>
-
-      <div class="tagline">
-        Study today. Achieve tomorrow.
-      </div>
-
+      <div class="brand">Revision Tracker</div>
+      <div class="tagline">Study today. Achieve tomorrow.</div>
     </div>
-
-    <button
-      class="icon-btn"
-      id="settingsBtn"
-      aria-label="Settings"
-    >
-      ⚙️
-    </button>
-
+    <button class="icon-btn" id="settingsBtn" aria-label="Settings">⚙️</button>
   </header>
-
 
   <main id="mainContent"></main>
 
-
   <nav class="bottom-nav">
-
-    <button
-      data-page="home"
-      class="nav-item active"
-    >
-      ⌂
-      <span>Home</span>
-    </button>
-
-    <button
-      data-page="subjects"
-      class="nav-item"
-    >
-      📚
-      <span>Subjects</span>
-    </button>
-
-    <button
-      data-page="today"
-      class="nav-item"
-    >
-      ✓
-      <span>Today</span>
-    </button>
-
-    <button
-      data-page="planner"
-      class="nav-item"
-    >
-      📅
-      <span>Planner</span>
-    </button>
-
-    <button
-      data-page="settings"
-      class="nav-item"
-    >
-      ⚙️
-      <span>Settings</span>
-    </button>
-
+    <button data-page="home" class="nav-item active">⌂<span>Home</span></button>
+    <button data-page="subjects" class="nav-item">📚<span>Subjects</span></button>
+    <button data-page="today" class="nav-item">✓<span>Today</span></button>
+    <button data-page="planner" class="nav-item">📅<span>Planner</span></button>
+    <button data-page="settings" class="nav-item">⚙️<span>Settings</span></button>
   </nav>
 
 </div>
 
-
 <div id="modalRoot"></div>
 
-
-<!-- Version number prevents old JS from being reused -->
-<script src="./script.js?v=6"></script>
-
+<script src="script.js"></script>
 </body>
 </html>
