@@ -3997,24 +3997,4 @@ function renderFiles(
                         '${file.id}'
                       )">
 
-
-          /* =========================================================
-   GLOBAL PLANNER ACTIONS
-   ========================================================= */
-
-/*
- * Make Planner date functions available
- * to HTML onclick / onchange events.
- */
-
-window.changePlannerDate =
-  changePlannerDate;
-
-window.plannerToday =
-  plannerToday;
-
-window.plannerPreviousDay =
-  plannerPreviousDay;
-
-window.plannerNextDay =
-  plannerNextDay;
+          
