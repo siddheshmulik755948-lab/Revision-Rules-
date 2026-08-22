@@ -7,8 +7,8 @@
 
 const APP_NAME = "Revision Tracker";
 
-const DB_NAME = "revision_tracker_offline_db";
-const DB_VERSION = 8;
+const DB_NAME = "revision_tracker_offline_db_v8";
+const DB_VERSION = 1;
 
 const DATA_STORE = "appData";
 const FILE_STORE = "notesFiles";
