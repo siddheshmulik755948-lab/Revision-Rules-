@@ -92,89 +92,174 @@ let state = createDefaultState();
    STARTUP
    ========================================================= */
 
-document.addEventListener("DOMContentLoaded", startApp);
+document.addEventListener("DOMContentLoaded", async () => {
 
-async function startApp() {
+  console.log("Revision Tracker: Starting...");
 
-  console.log(APP_NAME + " starting...");
+  /*
+   * IMPORTANT:
+   * First render the application UI.
+   * Do NOT wait for IndexedDB before rendering.
+   * This prevents a completely blank page if IndexedDB
+   * has an error or is unavailable.
+   */
 
   try {
-
-    /*
-     * IMPORTANT:
-     * Render first so the app never becomes a blank page
-     * just because IndexedDB fails.
-     */
 
     setupNavigation();
     setupSettingsButton();
 
+    if (!plannerSelectedDate) {
+      plannerSelectedDate = todayISO();
+    }
+
+    /*
+     * Render immediately using default state.
+     */
     render();
 
-    /*
-     * Try IndexedDB.
-     */
-
-    try {
-
-      await initDB();
-
-      if (dbAvailable) {
-
-        await loadState();
-
-        console.log(
-          "Revision Tracker data loaded."
-        );
-
-        render();
-      }
-
-    } catch (error) {
-
-      console.error(
-        "Database error:",
-        error
-      );
-
-      /*
-       * The interface still works in memory
-       * even if IndexedDB is unavailable.
-       */
-
-      toast(
-        "Local database unavailable. App is running temporarily."
-      );
-    }
-
-
-    /*
-     * Service worker is optional.
-     * It must never break the app.
-     */
-
-    try {
-
-      registerServiceWorker();
-
-    } catch (error) {
-
-      console.warn(
-        "Service Worker error:",
-        error
-      );
-    }
-
+    console.log("Revision Tracker: Initial UI rendered.");
 
   } catch (error) {
 
     console.error(
-      "Fatal startup error:",
+      "Initial render error:",
       error
     );
 
     showFatalError(error);
   }
+
+
+  /*
+   * Load database in the background.
+   */
+  try {
+
+    await initDB();
+
+    console.log(
+      "Revision Tracker: IndexedDB initialized."
+    );
+
+    await loadState();
+
+    console.log(
+      "Revision Tracker: State loaded."
+    );
+
+    /*
+     * Re-render after saved data has loaded.
+     */
+    render();
+
+    /*
+     * Register service worker after UI is working.
+     */
+    registerServiceWorker();
+
+    console.log(
+      "Revision Tracker: App ready."
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Database / state loading error:",
+      error
+    );
+
+    /*
+     * DO NOT make the page blank.
+     *
+     * The app will continue working with the
+     * default in-memory state.
+     */
+
+    toast(
+      "Local database unavailable. App is running in basic mode."
+    );
+
+    /*
+     * Make sure the UI is still visible.
+     */
+    render();
+  }
+
+});
+
+
+/* =========================================================
+   FATAL ERROR SCREEN
+   ========================================================= */
+
+function showFatalError(error) {
+
+  console.error(
+    "Fatal application error:",
+    error
+  );
+
+  const main =
+    document.getElementById(
+      "mainContent"
+    );
+
+  if (!main) {
+    return;
+  }
+
+  main.innerHTML = `
+    <section>
+
+      <div class="card">
+
+        <h2>
+          ⚠️ Revision Tracker
+        </h2>
+
+        <p
+          class="muted"
+          style="margin-top:10px">
+
+          The application could not start
+          correctly.
+
+        </p>
+
+        <button
+          class="btn full"
+          style="margin-top:15px"
+          onclick="location.reload()">
+
+          🔄 Reload App
+
+        </button>
+
+        <details
+          style="margin-top:15px">
+
+          <summary>
+            Technical details
+          </summary>
+
+          <pre
+            style="
+              white-space:pre-wrap;
+              margin-top:10px;
+              font-size:12px;
+            "
+          >${escapeHTML(
+            error?.message ||
+            String(error)
+          )}</pre>
+
+        </details>
+
+      </div>
+
+    </section>
+  `;
 }
 
 
