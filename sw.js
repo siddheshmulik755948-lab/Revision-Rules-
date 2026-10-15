@@ -1,7 +1,7 @@
 "use strict";
 
 const CACHE_NAME =
-  "revision-tracker-v5";
+  "revision-tracker-v6";
 
 const APP_FILES = [
   "./",
